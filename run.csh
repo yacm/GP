@@ -8,7 +8,7 @@
 #SBATCH --error=/sciclone/pscr/yacahuanamedra/ToDo/output.log
 
 
-if [ "$#" -ne 6 ]; then
+if [ "$#" -ne 7 ]; then
     echo "Usage: $0 <KERNEL_NAME>"
     exit 1
 fi
@@ -19,6 +19,7 @@ ITD=$3
 TIMES=$4
 ITERATIONS=$5
 mode=$6
+grid=$7
 
 # Conditional check for ITD
 if [ "$ITD" = "Im" ]; then
@@ -33,29 +34,30 @@ ITER=$((ITERATIONS / TIMES))
 #NEWSLURMID=$SLURM
 
 # Create the folder if it doesn't exist
-mkdir -p "${MODEL}_${KERNEL_NAME}"
+mkdir -p "${MODEL}_${KERNEL_NAME}(${mode}+${grid})"
 
 # Create the SLURM script dynamicallyy
-SLURM_SCRIPT="${MODEL}_${KERNEL_NAME}/job_script.slurm"
+SLURM_SCRIPT="${MODEL}_${KERNEL_NAME}(${mode}+${grid})/job_script.slurm"
 
 cat << EOF > $SLURM_SCRIPT
 #!/bin/tcsh
 
-#SBATCH --job-name=${MODEL}_${KERNEL_NAME}(${mode})${ITD}
-#SBATCH --output=/sciclone/pscr/yacahuanamedra/${MODEL}_${KERNEL_NAME}(${mode})/GP${ITD}_%a.log
-#SBATCH --error=/sciclone/pscr/yacahuanamedra/${MODEL}_${KERNEL_NAME}(${mode})/GP${ITD}_%a.log
+#SBATCH --job-name=${MODEL}_${KERNEL_NAME}(${mode}+${grid})${ITD}
+#SBATCH --output=/sciclone/pscr/yacahuanamedra/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs/GP${ITD}_%a.log
+#SBATCH --error=/sciclone/pscr/yacahuanamedra/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs/GP${ITD}_%a.log
 #SBATCH --time=72:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --array=0-${CPU}
-#SBATCH --mem=3000M
+#SBATCH --mem=1000M
 
 module load miniforge3/24.9.2-0
 conda activate gptorch
 
 @ NEWSLURMID = \$SLURM_ARRAY_TASK_ID % ${data}
+echo "Running on \$NEWSLURMID"
 
-python3 run.py --i \$NEWSLURMID --Nsamples ${ITER}  --L 100 --eps 0.001 --ITD ${ITD} --mean ${MODEL} --ker ${KERNEL_NAME} --mode ${mode}  --IDslurm \$SLURM_ARRAY_TASK_ID
+python3 run.py --i \$NEWSLURMID --Nsamples ${ITER}  --L 100 --eps 0.001 --ITD ${ITD} --mean ${MODEL} --ker ${KERNEL_NAME} --mode ${mode}  --IDslurm \$SLURM_ARRAY_TASK_ID --grid ${grid} --Nx 256
 EOF
 
 # Submit the job

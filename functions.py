@@ -16,6 +16,8 @@ import time
 from sklearn.preprocessing import MinMaxScaler 
 from sklearn.pipeline import Pipeline 
 import scipy.special
+import datetime
+from GP import *
 
 def get_dist_matelem(z, p, t_min,ITD="Re"):
     f = 0
@@ -60,6 +62,119 @@ def get_data(ITD):
     rM = np.mean(rMj,axis=0)
     rMe = np.std(rMj,axis=0)*np.sqrt(Nj) 
     return nu,rMj,rMe,rM
+
+
+def plothist(trace,mygp1,disc,params="model+kernel+noise",prior=False,burn=100,kernel='jacobi'):
+    fig, ax = plt.subplots(trace.shape[1], 1, figsize=(10, 10), sharex=False, sharey=False)
+
+    mygp=mygp1
+
+    i0 = 100
+    iF=10000
+    if kernel=='jacobi':
+        lab=['α', 'β', 'N','s', 't', 'a', 'b','σerror']
+        labprior=['α-prior', 'β-prior', 's-prior', 't-prior', 'a-prior', 'b-prior','σerror-prior']
+        if params=="kernel":
+            lab=lab[mygp.Npd_args:]
+            mygp.prior_dist=mygp.prior_dist[mygp.Npd_args:]
+        elif params=="kernel+noise":
+            lab=lab[mygp.Npd_args:]
+            mygp.prior_dist=mygp.prior_dist[mygp.Npd_args:]
+        else:
+            pass
+
+    elif kernel=='combinedRBF':
+        lab=['α','β','N','σ1','w1','σ2','w2','s','σnoise']
+        labprior=['α-prior','β-prior','σ1-prior','w1-prior','σ2-prior','w2-prior','s-prior','σerror-prior']
+        if params=="kernel":
+            lab=lab[mygp.Npd_args:]
+            mygp.prior_dist=mygp.prior_dist[mygp.Npd_args:]
+        elif params=="kernel+noise":
+            lab=lab[mygp.Npd_args:]
+            mygp.prior_dist=mygp.prior_dist[mygp.Npd_args:]
+        else:
+            pass
+        
+    elif kernel=='RBF':
+        lab=['α','β','N','σ','w','σnoise']
+        labprior=['α-prior','β-prior','σ-prior','w-prior','σerror-prior']
+        if params=="kernel":
+            lab=lab[mygp.Npd_args:]
+            mygp.prior_dist=mygp.prior_dist[mygp.Npd_args:]
+        elif params=="kernel+noise":
+            lab=lab[mygp.Npd_args:]
+            mygp.prior_dist=mygp.prior_dist[mygp.Npd_args:]
+        else:
+            pass
+    elif kernel=='model':
+        lab=['α','β']
+        labprior=['α-prior','β-prior']
+    else:
+        #parameters in greek
+        lab=['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ','ν','ξ','ο','π','ρ','σ','τ','υ','φ','χ','ψ','ω']
+        labprior=['α-prior','β-prior','γ-prior','δ-prior','ε-prior','ζ-prior','η-prior','θ-prior','ι-prior','κ-prior','λ-prior','μ-prior','ν-prior','ξ-prior','ο-prior','π-prior','ρ-prior','σ-prior','τ-prior','υ-prior','φ-prior','χ-prior','ψ-prior','ω-prior']
+
+    col=['red','blue','green','pink','black','orange','purple','brown','yellow','cyan','magenta','grey',"lightblue","lightgreen","lightcoral","lightpink","lightyellow","lightcyan","lightmagenta","lightgrey","darkblue","darkgreen","darkcoral","darkpink","darkyellow","darkcyan","darkmagenta","darkgrey"]
+    for i in range(trace.shape[1]):
+        ax[i].hist(trace[i0:iF,i],bins=disc,label=lab[i],color=col[i],density=True)
+        if prior:
+            initial=mygp.prior_dist[i].shift
+            final=mygp.prior_dist[i].shift+mygp.prior_dist[i].scale
+            xxx = tr.linspace(initial,final,1000)
+            distexp=mygp.prior_dist[i]
+            pdfs=tr.zeros(xxx.shape[0])
+            for k in range(xxx.shape[0]):
+                pdfs[k]=distexp.pdf(xxx[k])
+            ax[i].plot(xxx,pdfs.detach().numpy())
+            ax[i].set_xlim([initial-0.5,final+0.5])
+        ax[i].legend()
+    plt.show()
+
+def plothist1(trace,mygp1,disc,params="model+kernel+noise",prior=False,burn=100,kernel='jacobi'):
+    fig, ax = plt.subplots(trace.shape[1], 1, figsize=(10, 10), sharex=False, sharey=False)
+
+    mygp=mygp1
+
+    i0 = 100
+    iF=10000
+        #parameters in greek
+    """    lab=['α','β','γ','δ','ε','ζ','η','θ','ι','κ','λ','μ','ν','ξ','ο','π','ρ','σ','τ','υ','φ','χ','ψ','ω']
+        labprior=['α-prior','β-prior','γ-prior','δ-prior','ε-prior','ζ-prior','η-prior','θ-prior','ι-prior','κ-prior','λ-prior','μ-prior','ν-prior','ξ-prior','ο-prior','π-prior','ρ-prior','σ-prior','τ-prior','υ-prior','φ-prior','χ-prior','ψ-prior','ω-prior']"""
+
+    col=['red','blue','green','pink','black','orange','purple','brown','yellow','cyan','magenta','grey',"lightblue","lightgreen","lightcoral","lightpink","lightyellow","lightcyan","lightmagenta","lightgrey","darkblue","darkgreen","darkcoral","darkpink","darkyellow","darkcyan","darkmagenta","darkgrey"]
+    for i in range(trace.shape[1]):
+        ax[i].hist(trace[i0:iF,i],bins=disc,label=lab[i],color=col[i],density=True)
+        if prior:
+            initial=mygp.prior_dist[i].shift
+            final=mygp.prior_dist[i].shift+mygp.prior_dist[i].scale
+            xxx = tr.linspace(initial,final,1000)
+            distexp=mygp.prior_dist[i]
+            pdfs=tr.zeros(xxx.shape[0])
+            for k in range(xxx.shape[0]):
+                pdfs[k]=distexp.pdf(xxx[k])
+            ax[i].plot(xxx,pdfs.detach().numpy())
+            ax[i].set_xlim([initial-0.5,final+0.5])
+        ax[i].legend()
+    plt.show()
+def plotrace(trace,burn=100,kernel='jacobi'):
+    fig, ax = plt.subplots(trace.shape[1],figsize=(20, 8))
+    i0 = burn
+    iF=trace.shape[0]
+    if kernel=='jacobifull':
+        lab=['α','β','N','s','t','a','b']
+    elif kernel=='rbf':
+        lab=['α','β','N','σ','w','σnoise']
+    else:
+        lab=['α', 'β','N','σ1','w1','σ2','w2','s','σnoise']
+    col=['red','blue','green','pink','black','orange','purple','brown','grey',"lightblue","lightgreen","lightcoral","lightpink","lightyellow","lightcyan","lightmagenta","lightgrey","darkblue","darkgreen","darkcoral","darkpink","darkyellow","darkcyan","darkmagenta","darkgrey"]
+    for i in range(trace.shape[1]):
+        ax[i].plot(trace[i0:iF,i],label=lab[i],color=col[i])
+        ax[i].legend()
+    plt.show()
+#from tensor to list
+def tensor2list(tensor):
+    return [tensor[i].item() for i in range(tensor.shape[0])]
+
 
 ##integrator
 class FE_Integrator:
@@ -112,20 +227,20 @@ class FE_Integrator:
         return res
         
     def ComputeI(self,i,Kernel):
-        I,eI = integrate.quad(lambda x: Kernel(x)*self.f(x,i), self.x[i], self.x[i+2])
+        I,eI = integrate.quad(lambda x: Kernel(x)*self.f(x,i), self.x[i], self.x[i+2], epsrel=1e-12)
         self.eI += eI
         return I
     
     def ComputeIJ(self,i,j,Kernel):
-        I,eI = integrate.dblquad(lambda x,y: self.f(x,i)*Kernel(x,y)*self.f(y,j), self.x[j], self.x[j+2],self.x[i], self.x[i+2])
+        I,eI = integrate.dblquad(lambda x,y: self.f(x,i)*Kernel(x,y)*self.f(y,j), self.x[j], self.x[j+2],self.x[i], self.x[i+2], epsrel=1e-12)
         self.eI += eI
         return I
     
     
 # quadratic finite elements are more complicated...
 # ... but now it works!
-# also I should try the qubic ones too
-class FE2_Integrator:
+# also I should try the qubic ones too. It works only up to 1e-6
+class FE2_Integrator1:
     def __init__(self,x):
         self.N = x.shape[0]
         xx = np.append(x,[2.0*x[self.N-1] - x[self.N-2], 3.0*x[self.N-1]-2*x[self.N-2],0] )
@@ -143,11 +258,8 @@ class FE2_Integrator:
     def f(self,x,i):
         R=0.0
         if(i==0):
-            #R=self.pulse(x,self.x[0],self.x[1])
-            #R=self.pulse(x,self.x[1],self.x[2])
-        #    R+=(x- self.x[2])/(self.x[1] -self.x[2])*self.pulse(x,self.x[1],self.x[2])
 
-            R+=(x- self.x[2])*(x- self.x[3])/((self.x[1] -self.x[3])*(self.x[1] -self.x[2]))**np.heaviside(x-self.x[0],1.0)* np.heaviside(self.x[3]-x,0.5)
+            R+=(x- self.x[2])*(x- self.x[3])/((self.x[1] -self.x[3])*(self.x[1] -self.x[2]))*np.heaviside(x-self.x[0],1.0)* np.heaviside(self.x[3]-x,0.5)
             #self.pulse(x,self.x[0],self.x[3])
             return R
         ii =i+1
@@ -209,6 +321,111 @@ class FE2_Integrator:
 
         return I
 
+
+#It only work for odd number of points is based one above but works up to machine precision
+class FE2_Integrator:
+    def __init__(self,x):
+        self.N = x.shape[0]
+        #new grid
+        xx = np.append(x,[2.0*x[self.N-1] - x[self.N-2], 3.0*x[self.N-1]-2*x[self.N-2]] )
+        #self.x = np.append([-x[0],0],xx)
+        self.x = xx#np.append(0,xx)
+        self.eI = 0
+
+        self.Norm = np.empty(self.N)
+        for i in range(self.N):
+            self.Norm[i] = self.ComputeI(i, lambda x : 1)
+            
+    def pulse(self,x,x1,x2):
+        return np.heaviside(x-x1,1.0)* np.heaviside(x2-x,1.0)
+    
+    def f(self,x,i):
+        R=0.0
+        ii =i#+1
+        if(i==0):
+            #R=self.pulse(x,self.x[0],self.x[1])
+            #R=self.pulse(x,self.x[1],self.x[2])
+        #    R+=(x- self.x[2])/(self.x[1] -self.x[2])*self.pulse(x,self.x[1],self.x[2])
+            R+=(x- self.x[1])*(x- self.x[2])/((self.x[0] -self.x[2])*(self.x[0]-self.x[1]))*np.heaviside(x-self.x[0],1.0)* np.heaviside(self.x[2]-x,1.0)
+            #self.pulse(x,self.x[0],self.x[3])
+            #print(i,R,x,(x- self.x[2])*(x- self.x[3])/((self.x[1] -self.x[3])*(self.x[1]-self.x[2])),np.heaviside(x-self.x[3],1.0)* np.heaviside(self.x[0]-x,1.0))
+            return R
+        elif(i==self.N-1):
+            R += (x- self.x[ii-2])*(x- self.x[ii-1])/((self.x[ii] -self.x[ii-2])*(self.x[ii] -self.x[ii-1]))*self.pulse(x,self.x[ii-2],self.x[ii])
+            return R
+        
+        if((ii+1)%2==0):#Even
+            R  += (x- self.x[ii-1])*(x- self.x[ii+1])/((self.x[ii] -self.x[ii+1])*(self.x[ii] -self.x[ii-1]))*self.pulse(x,self.x[ii-1],self.x[ii+1])
+            return R
+        else:#odd?
+            R += (x- self.x[ii-2])*(x- self.x[ii-1])/((self.x[ii] -self.x[ii-2])*(self.x[ii] -self.x[ii-1]))*self.pulse(x,self.x[ii-2],self.x[ii  ])
+            R += (x- self.x[ii+1])*(x- self.x[ii+2])/((self.x[ii] -self.x[ii+2])*(self.x[ii] -self.x[ii+1]))*self.pulse(x,self.x[ii],self.x[ii+2])
+            return R
+
+    
+    def set_up_basis(self,newgrid):
+        res = np.empty(newgrid.shape[0])
+        for i in range(newgrid.shape[0]):
+            res[i] = 0.0
+            for j in range(self.N):
+                res[i] += self.f(newgrid[i],j)#*self.Norm[j]
+        return res
+    
+    def set_up_integration(self,Kernel = lambda x: 1):
+        res = np.empty(self.N)
+        for i in range(self.N):
+            res[i] = self.ComputeI(i,Kernel)
+        return res
+    
+        
+    # assume symmetrix function F(x,y) = F(y,x)
+    # for efficiency 
+    def set_up_dbl_integration(self,Kernel = lambda x,y: 1):
+        res = np.empty([self.N,self.N])
+        for i in range(self.N):
+            for j in range(i,self.N):
+                res[i,j] = self.ComputeIJ(i,j,Kernel)
+                res[j,i]  = res[i,j]
+        return res
+
+
+    def ComputeI(self,i,Kernel):
+        eps=1e-8
+        if(i==0):
+            I,eI = integrate.quad(lambda x: Kernel(x)*self.f(x,0), self.x[0], self.x[2],epsabs=eps)
+            self.eI += eI
+            return I
+        if(i==self.N):
+            I,eI = integrate.quad(lambda x: Kernel(x)*self.f(x,self.N-1), self.x[self.N-3], self.x[self.N-1],epsabs=eps)
+            self.eI += eI
+        ii=i
+        if((ii+1)%2==0):
+            I,eI = integrate.quad(lambda x: Kernel(x)*self.f(x,i), self.x[ii-1], self.x[ii+1],epsabs=eps)
+            self.eI += eI
+        else:
+            I,eI = integrate.quad(lambda x: Kernel(x)*self.f(x,i), self.x[ii-2], self.x[ii+2], epsabs=eps)
+            self.eI += eI
+        return I
+    
+    def ComputeIJ(self,i,j,Kernel):
+        # I need to fix the i=0 case
+        ii=i+1
+        jj=j+1
+        if(ii%2==0):
+            xx = (self.x[ii-1], self.x[ii+1])
+        else:
+            xx = (self.x[ii-2], self.x[ii+2])
+        if(jj%2==0):
+            yy = (self.x[jj-1], self.x[jj+1])
+        else:
+            yy = (self.x[jj-2], self.x[jj+2])
+        
+        I,eI = integrate.dblquad(lambda x,y: self.f(x,i)*Kernel(x,y)*self.f(y,j), yy[0], yy[1],xx[0], xx[1],epsrel=1e-12)
+        self.eI += eI
+
+        return I
+
+
 def interp(x,q,fe):
     S = 0*x
     for k in range(fe.N):
@@ -217,8 +434,6 @@ def interp(x,q,fe):
 
 
 #### MODELS ####
-
-
 class simple_PDF():
     def __init__(self,a,b,g): 
         self.a=a
@@ -330,7 +545,7 @@ def PDF(x,a,b,N):
 def KrbfMat(x,s,w):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
-    return s*s*tr.exp(-0.5*((xx - yy)/w)**2)
+    return (s**2)*tr.exp(-0.5*((xx - yy)/w)**2)
 
 def Krbflog(x,s,w,eps=1e-13):
     xx=x.view(1,x.shape[0])
@@ -455,7 +670,7 @@ def rbf_deb(x,s1,w1,s2,w2,scale,sp=0.1,eps=1e-12):
     sC = 1-s
     return  s*K1*s.T +sC*K2*sC.T
 
-def rbf_deb_s1(x,s1,w1,s2,w2,scale=0.1,sp=0.1,eps=1e-12):
+def rbf_deb_s1(x,s1,w1,s2,w2,scale=0.1,sp=0.1,eps=1e-13):
     #plot this values and it looks like a simple rbf kernel
     #s1,w1,s2,w2,scale,sp =  1.0,0.1,1.0,2.2,1.0,.1
     K1 = KrbfMat(x,s1,w1) # linear
@@ -464,6 +679,17 @@ def rbf_deb_s1(x,s1,w1,s2,w2,scale=0.1,sp=0.1,eps=1e-12):
     ss=Sig(xx,scale,sp)
     s=transform(ss)
     #sig=sig.view(1,sig.shape[1]).repeat(sig.shape[1],1)
+    sC = 1-s
+    return  s*K1*s.T +sC*K2*sC.T
+
+def rbf_deb_s1_s2(x,w1,w2,scale=1.0,sp=0.1,eps=1e-13):
+    s1=1.5
+    s2=2.5
+    K1 = KrbfMat(x,s1,w1) # linear
+    K2 = Kdebbio(x,s2,w2,eps) #log
+    xx=x.view(1,x.shape[0])
+    ss=Sig(xx,scale,sp)
+    s=transform(ss)
     sC = 1-s
     return  s*K1*s.T +sC*K2*sC.T
 
@@ -498,7 +724,7 @@ def Kdebbio(x,l0,sig,eps=1e-13):
     yy=x.view(x.shape[0],1)
     return sig**2*tr.sqrt(2*l(xx,l0,eps)*l(yy,l0,eps)/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*tr.exp(-(xx-yy)**2/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))
 
-def Kdebbioxa(x,l0,sig,a,eps=1e-12):
+def Kdebbioxa(x,l0,sig,a,eps=1e-13):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
     return xx**a*sig**2*tr.sqrt(2*l(xx,l0,eps)*l(yy,l0,eps)/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*tr.exp(-(xx-yy)**2/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*yy**a
@@ -610,6 +836,14 @@ def Kcom_ds(x,s1,w1,s2,w2,scale,sp=0.1,eps=1e-12):
     F2=((dsx)*sy.T + sx*(dsy.T))*K1
     return F1+F2
 
+def R(z,t):
+    return 1.0/tr.sqrt(1-2*z*t+t*t)
+
+def jacobi(x,s,t,a,b):
+   x=x.view(x.shape[0],1)
+   y=x.view(1,x.shape[0])
+   return (s**2)*(x*y)**a*((1-x)*(1-y))**b*(R(2*x-1,t)*R(2*y-1,t)*((1-t+R(2*x-1,t))*(1-t+R(2*y-1,t)))**a*((1+t+R(2*x-1,t))*(1+t+R(2*y-1,t)))**b)**(-1)
+
 #set up input data
 def preparedata(i,nu,rMj,rMe,rM,x_grid,ITD="Re"):
 
@@ -625,12 +859,11 @@ def preparedata(i,nu,rMj,rMe,rM,x_grid,ITD="Re"):
     Nj = 349
     rMj = np.empty([Nj,Np,Nz])"""
     #indices [p,z,
-    CovD= np.cov(rMj[:,:,i].T*np.sqrt(Nj-1))
+    CovD= np.cov(rMj[:,:,i].T*np.sqrt(Nj-1))#same factor used to plot the data
     CovD=(CovD+CovD.T)/2.0
-    #CovD=CovD**0.5
-    #change nans by 0
+
     CovD=np.abs(CovD)
-    CovD[CovD<0]=0
+    #CovD[CovD<0]=0
 
     M = rM.T[i]
     eM = rMe.T[i]
@@ -760,35 +993,49 @@ def preparemockdata1(Nnupoints,numax,x_grid,ITD="Re"):
 
     return x_grid,V,Y,Gamma
 
-def NNPDFdata(datanu,x_grid,regulator=True,ITD="Re"):
+def covfilter(cov,n):
+    N=cov.shape[0]
+    for i in range(N):
+        for j in range(N):
+            if np.abs(i-j)>n-1:
+                cov[i,j]=0
+    return cov
+
+def NNPDFdata(datanu,x_grid,regulator,lamb,ITD="Re"):
     nu_d_grid = datanu.T[1]
     numax=nu_d_grid.shape[0]
+    #print("numax: ",numax)
     Nx=x_grid.shape[0]
     if regulator:
         if ITD=="Re":
             if numax==25:
-                Reg=1e-8*np.identity(nu_d_grid.shape[0])
+                Reg=regulator[0]*np.identity(nu_d_grid.shape[0])#1e-7
             elif numax==10:
-                Reg=1e-10*np.identity(nu_d_grid.shape[0])
+                Reg=regulator[1]*np.identity(nu_d_grid.shape[0])#1e-9
             elif numax==4:
-                Reg=1e-10*np.identity(nu_d_grid.shape[0])
+                Reg=regulator[2]*np.identity(nu_d_grid.shape[0])#1e-10
         elif ITD=="Im":
             if numax==25:
-                Reg=1e-7*np.identity(nu_d_grid.shape[0])
+                Reg=regulator[0]*np.identity(nu_d_grid.shape[0])#1e-7
             elif numax==10:
-                Reg=1e-7*np.identity(nu_d_grid.shape[0])
+                Reg=regulator[1]*np.identity(nu_d_grid.shape[0])#1e-9
             elif numax==4:
-                Reg=1e-7*np.identity(nu_d_grid.shape[0])
+                Reg=regulator[2]*np.identity(nu_d_grid.shape[0])#1e-10
     else:
         Reg=0
 
 
     M=datanu.T[2:].mean(axis=0)
-    eMnu=datanu.T[2:].std(axis=0)*np.sqrt(datanu.shape[0])
-    CovD=np.cov(datanu.T[2:].T)
+    eMnu=datanu.T[2:].std(axis=0)#*np.sqrt(datanu.shape[0])
+    CovD=np.cov(datanu.T[2:].T)#*np.sqrt(datanu.shape[0]-1))
     #Symetrize the matrix CovD
     #print("Symetrize the matrix CovD")
     CovD=(CovD+CovD.T)/2.0
+
+    #CovD=covfilter(CovD,1)
+    #CovD=truncatecov(CovD)
+    regu=0.0#1e-3
+    #CovD=np.abs(CovD)
     
 
     fe = FE2_Integrator(x_grid)
@@ -800,36 +1047,44 @@ def NNPDFdata(datanu,x_grid,regulator=True,ITD="Re"):
     for k in np.arange(nu_d_grid.shape[0]):
         if ITD=="Re":
             B[k,:] = fe.set_up_integration(Kernel= lambda x : np.cos(nu_d_grid[k]*x))
-            lam = 1e-10   # soften the constrants
-            lam_c = 1e-10
+            lam = lamb[0]  # soften the constrants
+            lam_c = lamb[1]
         elif ITD=="Im":
 
             B[k,:] = fe.set_up_integration(Kernel= lambda x : np.sin(nu_d_grid[k]*x))
-            lam_c = 1e-10
+            lam_c = lamb[1]
     if ITD=="Re":
         V = np.concatenate((B0[np.newaxis,:],B1[np.newaxis,:],B))
         Gamma = np.zeros((V.shape[0],V.shape[0]))
         Gamma[0,0] = lam
         Gamma[1,1] = lam_c
         #Gamma[2:,2:] = CovD + Reg#np.diag(eM)#CovD
-        if numax>6:
+        if numax>30:
             #print("Flag1")
             Gamma[2:,2:] = np.diag(np.diag(CovD))
         else:
-            Gamma[2:,2:] = CovD +Reg#np.diag(eM**2)
+            Gamma[2:,2:] = CovD + regu*np.diag(np.diag(CovD))#np.diag(eM**2)
         Y = np.concatenate(([1.0,0.0],M))
     elif ITD=="Im":
         V = np.concatenate((B1[np.newaxis,:],B))
         Gamma = np.zeros((V.shape[0],V.shape[0]))
         Gamma[0,0] = lam_c
-        if numax>6:
-            #print("Flag1")
+        if numax>26:
             Gamma[1:,1:] = np.diag(np.diag(CovD))
         else:
-            Gamma[1:,1:] = CovD +Reg#np.diag(eM**2)
+            Gamma[1:,1:] = CovD + regu*np.diag(np.diag(CovD))#np.diag(eM**2)
         Y = np.concatenate(([0.0],M))
 
     return x_grid,V,Y,Gamma
+
+#Optimal truncation of the covariance matrix
+
+def truncatecov(cov):
+    svd=np.linalg.svd(cov)
+    med=np.median(svd[1])
+    optimal=med*4/np.sqrt(3)
+    svd[1][svd[1]<optimal]=0
+    return svd[0] @ np.diag(svd[1]) @ svd[2]
 
 
 def preparemockdata(Nnupoints,numax,ITD="Re",Nx=256):
@@ -911,12 +1166,13 @@ def preparemockdata(Nnupoints,numax,ITD="Re",Nx=256):
     return x_grid,V,Y,Gamma
 
 
-def arguments(modelname,kernelname,nugget,device,mode,ID):
+def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx):
     if modelname==PDF_N.__name__:
         meanf=tr.tensor([-1.0,0.0,0.0])
         sigmaf=tr.tensor([2.0,6.0,4.0])
         configf=tr.tensor([2,2,2])
         mod=(-0.0,1.0,1.0)
+        labf=['α', 'β', 'N']
         modfunc=PDF_N
 
     elif modelname==ModelC.__name__:#Constant model
@@ -924,6 +1180,9 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmaf=tr.tensor([20.0])
         configf=tr.tensor([2])
         mod=(1.0,)
+        #if mode=="kernel":
+        #    mod=(0.0,)
+        labf=['N']
         modfunc=ModelC
 
     elif modelname==PDFnormed.__name__:
@@ -931,6 +1190,7 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmaf=tr.tensor([2.0,6.0])
         configf=tr.tensor([2,2])
         mod=(-0.0,1.0)
+        labf=['α', 'β']
         modfunc=PDFnormed
 
     elif modelname==PDF.__name__:
@@ -938,6 +1198,9 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmaf=tr.tensor([2., 15., 15.])#2.0,7.0,20.0])
         configf=tr.tensor([2,2,2])
         mod=(0.0,1.0,2.0)
+        #if mode=="kernel":
+        #    mod=(0.0,0.0,0.0)
+        labf=['α', 'β', 'N']
         modfunc=PDF
 
     #select the kernel
@@ -947,14 +1210,16 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
         configk=tr.tensor([2,2,2,2,2,2])
         #ker=(50.0,1.1,50.0,1.0,1.0)
-        ker=(2.5,0.1,2.5,0.1,1.0)
+        ker=(1.0,1.0,2.5,1.0,1.0)
+        labk=['σ1','l1','σ2','l2','s']
         kerfunc=rbf_logrbf
 
     elif kernelname==rbf_deb.__name__: 
         meank=tr.tensor([0.0,0.0,0.0,0.0,0.0])
         sigmak=tr.tensor([11.0,6.0,11.0,11.0,2.0])
         configk=tr.tensor([2,2,2,2,2,2])
-        ker=(4.0,5.0,4.0,2.0,0.1)
+        ker=(2.0,1.0,2.5,1.0,1.0)
+        labk=['σ1','l1','σ2','l2','s']
         kerfunc=rbf_deb
 
     if kernelname==rbf_logrbf_s1.__name__:
@@ -963,6 +1228,7 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         configk=tr.tensor([2,2,2,2])
         #ker=(50.0,1.1,50.0,1.0,1.0)
         ker=(5.0,0.1,5.0,1.0)
+        labk=['σ1','l1','σ2','l2']
         kerfunc=rbf_logrbf_s1
 
     if kernelname==rbf_logrbf_s_w.__name__:
@@ -970,6 +1236,7 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmak=tr.tensor([20.0,20.0])
         configk=tr.tensor([2,2])
         ker=(2.0,2.0)
+        labk=['σ1','σ2']
         kerfunc=rbf_logrbf_s_w
 
     if kernelname==rbf_deb_s1.__name__:
@@ -978,13 +1245,24 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         configk=tr.tensor([2,2,2,2])
         #ker=(50.0,1.1,50.0,1.0,1.0)
         ker=(5.0,5.0,10.0,10.0)
+        labk=['σ1','l1','σ2','l2']
         kerfunc=rbf_deb_s1
+
+    if kernelname==rbf_deb_s1_s2.__name__:
+        meank=tr.tensor([0.0,0.0])
+        sigmak=tr.tensor([10.0,10.0])
+        configk=tr.tensor([2,2])
+        #ker=(50.0,1.1,50.0,1.0,1.0)
+        ker=(2.5,2.5)
+        labk=['l1','l2']
+        kerfunc=rbf_deb_s1_s2
 
     elif kernelname==rbf_deb_s_w.__name__: 
         meank=tr.tensor([0.0,0.0])
         sigmak=tr.tensor([11.0,6.0])
         configk=tr.tensor([2,2])
         ker=(5.0,5.1)
+        labk=['σ1','σ2']
         kerfunc=rbf_deb_s_w
 
 
@@ -993,20 +1271,23 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmak=tr.tensor([10.0,10.0])
         configk=tr.tensor([2,2])
         ker=(0.1,0.1)
+        labk=['l1','l2']
         kerfunc=rbf_logrbf_no_s
 
     elif kernelname==KrbfMat.__name__: 
         meank=tr.tensor([0.0,0.0])
-        sigmak=tr.tensor([11.0,2.0])
+        sigmak=tr.tensor([11.0,5.0])
         configk=tr.tensor([2,2])
-        ker=(3.1,1.1)
+        ker=(2.5,0.5)
+        labk=['σ','l']
         kerfunc=KrbfMat
 
     elif kernelname==Krbflog.__name__:
         meank=tr.tensor([0.0,0.0])
         sigmak=tr.tensor([10.0,10.0])
         configk=tr.tensor([2,2])
-        ker=(4.0,1.0)
+        ker=(2.0,0.5)
+        labk=['σ','l']
         kerfunc=Krbflog
 
     elif kernelname==Krbflog_no_s.__name__:
@@ -1014,6 +1295,7 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmak=tr.tensor([10.0])
         configk=tr.tensor([2])
         ker=(1.1,)
+        labk=['l']
         kerfunc=Krbflog_no_s
         
     elif kernelname==Krbf_no_s.__name__:
@@ -1021,6 +1303,7 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmak=tr.tensor([10.0,10.0])
         configk=tr.tensor([2,2])
         ker=(0.1,0.1)
+        labk=['l']
         kerfunc=Krbf_no_s
 
     elif kernelname==Krbf_fast.__name__:
@@ -1028,6 +1311,7 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmak=tr.tensor([12.0,12.0])
         configk=tr.tensor([2,2])
         ker=(0.0,0.0)
+        labk=['10^σ','10^l']
         kerfunc=Krbf_fast
 
     elif kernelname==Kdebbio.__name__:
@@ -1035,13 +1319,15 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmak=tr.tensor([10.0,10.0])
         configk=tr.tensor([2,2])
         ker=(5.0,9.1)
+        labk=['σ','l']
         kerfunc=Kdebbio
 
     elif kernelname==Kdebbioxa.__name__:
         meank=tr.tensor([0.0,0.0,-1.0])
-        sigmak=tr.tensor([10.0,10.0,2.0])
+        sigmak=tr.tensor([10.0,10.0,1.0])
         configk=tr.tensor([2,2,2])
-        ker=(3.0,1.1,-0.6)
+        ker=(2.0,0.5,-0.2)
+        labk=['σ','l','α']
         kerfunc=Kdebbioxa
 
     elif kernelname==Kdebbioxb.__name__:
@@ -1049,6 +1335,7 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmak=tr.tensor([11.0,10.0,5.0])
         configk=tr.tensor([2,2,2])
         ker=(3.0,2.1,3.0)
+        labk=['σ','l','β']
         kerfunc=Kdebbioxb
 
     elif kernelname==KSM.__name__:
@@ -1056,18 +1343,21 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmak=tr.tensor([10.0,5.0,10.0,10.0,5.0,10.0])
         configk=tr.tensor([2,2,2,2,2,2])
         ker=(10.0,0.5,4.0,10.0,1.5,3.0)
+        labk=['σ1','l1','τ1','σ2','l2','τ2']
         kerfunc=KSM
     elif kernelname==Kpoly.__name__:
         meank=tr.tensor([0.0,0.0,0.0,0.0])
         sigmak=tr.tensor([11.0,1.0,10.0,10.0])
         configk=tr.tensor([2,2,2,2])
         ker=(10.0,0.5,1.0,5.0)
+        labk=['σ','l','a','b']
         kerfunc=Kpoly
     elif kernelname==Kpoly2.__name__:
         meank=tr.tensor([0.0,0.0,0.0,0.0])
         sigmak=tr.tensor([10.0,10.0,10.0])
         configk=tr.tensor([2,2,2])
         ker=(9.0,1.0,5.0)
+        labk=['σ','l','a']
         kerfunc=Kpoly
 
     elif kernelname==log_jac.__name__:
@@ -1075,31 +1365,89 @@ def arguments(modelname,kernelname,nugget,device,mode,ID):
         sigmak=tr.tensor([11.0,1.0,10.0,10.0,10.0,10.0,2.0])
         configk=tr.tensor([2,2,2,2,2,2,2])
         ker=(10.0,0.5,2.0,1.0,9.0,1.0,1.0)
+        labk=['σ1','l1','σ2','l2','a','b','s']
         kerfunc=log_jac
     elif kernelname==jacobi.__name__:
         meank=tr.tensor([0.0,0.0,0.0,0.0])
         sigmak=tr.tensor([20.0,1.0,20.0,20.0])
         configk=tr.tensor([2,2,2,2])
-        ker=(10.0,0.5,1.0,1.0)
+        ker=(2.5,0.5,1.0,2.0)
+        labk=['σ','t','a','b']
         kerfunc=jacobi
 
     if nugget=="yes":
         meank=tr.cat((meank,tr.tensor([0.0])))
-        sigmak=tr.cat((sigmak,tr.tensor([2.0])))
-        configk=tr.cat((configk,tr.tensor([2.0])))
-        ker=ker+(0.01,)
+        sigmak=tr.cat((sigmak,tr.tensor([10.0])))
+        configk=tr.cat((configk,tr.tensor([2])))
+        ker=ker+(1.0,)
+        labk=labk+['σ']
 
     #stack the spec model and kernel
     if mode=="mean":
         mean=meanf
         sigma=sigmaf
         config=configf
+        lab=labf
+        
     elif mode=="kernel":
         mean=meank
         sigma=sigmak
         config=configk
+        lab=labk
     elif mode=="all":
         mean=tr.cat((meanf,meank))
         sigma=tr.cat((sigmaf,sigmak))
         config=tr.cat((configf,configk))
-    return mean,sigma,config,mod,ker,modfunc,kerfunc,device,mode,ID
+        lab=labf+labk
+
+    x_grid=generategrid(Nx,grid)
+
+    return mean,sigma,config,mod,ker,modfunc,kerfunc,device,mode,ID,x_grid,lab
+
+#Following grids specified in the draft
+def generategrid(Nx,grid):
+    if grid=="lin":
+        x_grid = np.linspace(0.0+1e-6,1-1e-6,np.int32(Nx+1))#
+    elif grid=="log_lin":
+        x_grid=np.concatenate((np.linspace(5e-9,1,1) ,np.logspace(-8,-1,np.int32(Nx/2)), np.linspace( 0.1+1e-4 ,1-1e-8,np.int32(Nx/2))))
+    return x_grid
+
+
+#select the model and kernel
+def Modeldef(ITD,modelname,kernelname,nugget,device,mode,ID,test,grid,Nx):
+    fits_comb=[]
+    mean,sigma,config,mod,ker,modfunc,kerfunc,device,mode,ID,x_grid,lab = arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx)
+    nu,rMj,rMe,rM = get_data(ITD)
+    now = datetime.datetime.now()
+    print("#################Define the model###########################")
+    print ("Current date and time :", now.strftime("%Y-%m-%d %H:%M:%S"))
+    print("GP specifications \n Sampling or training: "+mode+"\n model: "+modelname+"\n kernel: "+kernelname+" nugget: "+ nugget+"\n Ioffe time Distribution: "+ITD+"(M)",
+          "\n mean =",mean,"\n sigma =",sigma,"\n prior dist =",config,"\n model init =",mod,"\n kernel init =",ker,"\n device =",device,"\n mode =",mode,"\n ID =",ID)
+    #print("0=gaussian, 1=lognormal, 2=expbeta")
+    for i in range(0,12):
+        x_gri0,V0,Y0,Gamma0 = preparedata(i,nu,rMj,rMe,rM,x_grid,ITD=ITD)
+        myGP0= GaussianProcess(x_gri0,V0,Y0,Gamma0,f"z={i+1}a",nugget=nugget,device=device,ITD=ITD,labels=lab,Pd=modfunc, Ker=kerfunc,Pd_args=mod,Ker_args=ker)
+        myGP0.prior2ndlevel(mode,0.99,mean=mean,sigma=sigma,prior_mode=config)
+        fits_comb.append(myGP0)
+        #print(fits_comb[i].name, "done")
+    if ITD=="Re" and test=="mock":
+        numax=[4,10,25]
+        for j in range(0,3):
+            x_gri0,V0,Y0,Gamma0 = preparemockdata1(numax[j]+1,numax[j],x_grid,ITD)
+            myGP0= GaussianProcess(x_gri0,V0,Y0,Gamma0,f"z=mock({numax[j]})",nugget=nugget,device=device,ITD=ITD,labels=lab,Pd=modfunc, Ker=kerfunc,Pd_args=mod,Ker_args=ker)
+            myGP0.prior2ndlevel(mode,0.99,mean=mean,sigma=sigma,prior_mode=config)
+            fits_comb.append(myGP0)
+            #print(fits_comb[-1].name, "done")
+    elif test=="NNPDF":
+        if ITD=="Re":
+            MMM='real'
+        elif ITD=="Im":
+            MMM='imag'
+        for i in [4,10,25]:
+            datanu4 = np.loadtxt('NNPDF/NNPDF40_nnlo_as_01180_1000_itd_'+MMM+'_numax'+str(i)+'.dat',dtype=np.float64)
+            x_gri0,V0,Y0,Gamma0 = NNPDFdata(datanu4,x_grid,[1e-9,1e-10,1e-13],[1e-10,1e-10],ITD)
+            myGP0= GaussianProcess(x_gri0,V0,Y0,Gamma0,f"z=NNPDF({i})",nugget=nugget,device=device,ITD=ITD,labels=lab,Pd=modfunc, Ker=kerfunc,Pd_args=mod,Ker_args=ker)
+            myGP0.prior2ndlevel(mode,0.99,mean=mean,sigma=sigma,prior_mode=config)
+            fits_comb.append(myGP0)
+            print(fits_comb[-1].name, "done")
+    return fits_comb

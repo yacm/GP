@@ -8,10 +8,11 @@ import torch.nn.functional as F
 from torchquad import Simpson
 
 from HMC import *
+#from functions import *
 
 # I have modified the class to include the possibility of a prior in the second level of inference
 class GaussianProcess():
-    def __init__(self,x_grid,V,Y,Gamma,name,device,ITD,nugget="no",Pd= lambda x : 2.*(1.-x) ,Ker = lambda x: tr.outer(x,x),**args):
+    def __init__(self,x_grid,V,Y,Gamma,name,device,ITD,labels,nugget="no",Pd= lambda x : 2.*(1.-x) ,Ker = lambda x: tr.outer(x,x),**args):
         if device=="cpu":
             tr.set_default_dtype(tr.float64)
         else:
@@ -21,7 +22,8 @@ class GaussianProcess():
         self.name=name
         self.device= device
         self.ITD=ITD
-        self.flag=nugget#define if you consider noisy of noiseless data
+        self.lab=labels #labels of my variables
+        self.flag=nugget#you want to use a regularization method
         self.x_grid = tr.tensor(x_grid).to(self.device)
         self.N = x_grid.shape[0]
         self.V = tr.tensor(V).to(self.device)
@@ -33,6 +35,8 @@ class GaussianProcess():
         self.pd_args = tuple([tr.tensor([a]) for a in args["Pd_args"]])
         self.ker_args = tuple([tr.tensor([a]) for a in args["Ker_args"]])
         self.trainingcount=0
+
+        self.reg=0.0
         ### extract the error as a hyperparameter
         if self.flag=="yes":
             self.sig = self.ker_args[-1] 
@@ -53,8 +57,9 @@ class GaussianProcess():
             self.mask=F.pad(m,(1,0,1,0),value=0).to(self.device)
         
     def ComputePosterior(self): # computes the covariance matrix of the posterior
-        K = self.Ker(self.x_grid,*self.ker_args)
+        K = self.Ker(self.x_grid,*self.ker_args)+self.reg*tr.eye(self.x_grid.shape[0]).to(self.device)
         Pd = self.Pd(self.x_grid,*self.pd_args)
+        K=(K+K.T)/2.0
         
         if self.flag=="yes":
             #m=tr.ones(self.Gamma.shape[0]-2,self.Gamma.shape[1]-2)
@@ -72,7 +77,7 @@ class GaussianProcess():
         self.CpMat = K - VK.T@iChat@VK
         self.Pm = Pd +VK.T@iChat@(self.Y-self.V@Pd)
         return self.Pm,self.CpMat
-    def Uncertaintyanalysis(self,trace):
+    def model_averaging_importantsampling(self,trace):
         qofx=tr.zeros_like(self.x_grid)
         Z=tr.tensor([0.0])
         nn = np.linspace(0,26,128)
@@ -124,6 +129,7 @@ class GaussianProcess():
         cov = tr.zeros((self.x_grid.shape[0],self.x_grid.shape[0]))
         covnu=tr.zeros((nn.shape[0],nn.shape[0]))
         Z=tr.tensor([0.0])
+        
         for i in range(trace.shape[0]):
             pd_args = tuple(trace[i,:self.Npd_args])
             k_args = tuple(trace[i,self.Npd_args:])
@@ -161,18 +167,11 @@ class GaussianProcess():
 
         return qs,cov/Z,Pms,Qs,covnu/Z,Qnu
 
-    def model_averaging(self,trace):
+    def model_averaging(self,trace,nn,iB,reg):
+        self.reg_ma=reg
         qofx=tr.zeros_like(self.x_grid)
         #Z=tr.tensor([0.0])
-        nn = np.linspace(0,26,128)
-        iB = np.zeros((nn.shape[0],self.x_grid.shape[0]))
-        fe=FE2_Integrator(self.x_grid)
-        if self.ITD=="Re":
-            for k in range(nn.shape[0]):
-                iB[k,:] = fe.set_up_integration(Kernel= lambda x : np.cos(nn[k]*x))
-        else:
-            for k in range(nn.shape[0]):
-                iB[k,:] = fe.set_up_integration(Kernel= lambda x : np.sin(nn[k]*x))
+
         nn=tr.tensor(nn).to(self.device)
         Qofnu=tr.zeros_like(nn)
         iB=tr.tensor(iB).to(self.device)
@@ -180,8 +179,15 @@ class GaussianProcess():
         Qnu=[]
         #<q> and <Q> calculation
         for i in range(trace.shape[0]):
-            pd_args = tuple(trace[i,0:self.Npd_args])
-            k_args = tuple(trace[i,self.Npd_args:])
+            if self.mode=="kernel":
+                k_args = tuple(trace[i,:])
+                pd_args = self.pd_args
+            elif self.mode=="mean":
+                pd_args = tuple(trace[i,:])
+                k_args = self.ker_args
+            else:
+                pd_args = tuple(trace[i,0:self.Npd_args])
+                k_args = tuple(trace[i,self.Npd_args:])
             #E=self.nlpEvidence(pd_args,k_args)#/2.0
             if self.flag=="yes":
                 sig = k_args[-1]
@@ -189,33 +195,48 @@ class GaussianProcess():
                 k_args = k_args[:-1]
             else:
                 sig = 1.0
-            K = self.Ker(self.x_grid,*k_args)
+            K = self.Ker(self.x_grid,*k_args)#+ self.reg_ma*tr.eye(self.x_grid.shape[0]).to(self.device)
+            #K = (K+K.T)/2.0 # + 1e-11*tr.eye(K.shape[0]).to(self.device)
             Pd = self.Pd(self.x_grid,*pd_args)
             if self.flag=="yes":
                 Chat = self.Gamma*(1-self.mask) + (sig**2)*self.mask*self.Gamma +self.V@K@self.V.T
             else:
                 Chat = self.Gamma + self.V@K@self.V.T
             iChat = tr.linalg.inv(Chat)
+            
             VK = self.V@K
-            #CpMat = K - VK.T@iChat@VK
+            CpMat = K - VK.T@iChat@VK
+            #L=tr.linalg.cholesky(Chat)
+            #X=tr.linalg.solve(L,self.Y-self.V@Pd)
+            #Y=tr.linalg.solve(L,VK)
             Pm = Pd +VK.T@iChat@(self.Y-self.V@Pd)
+            #Pm= Pd +Y.T@X
 
 
             #THIS ARE THE ACTUAL MEAN? yes
-            qofx+=Pm/trace.shape[0]
-            Qofnu+=Pm@iB.T/trace.shape[0]
+            qofx+=Pm
+            Qofnu+=Pm@iB.T
 
             Qnu.append(Pm@iB.T)
             Pms.append(Pm)
 
+        qofx=qofx/trace.shape[0]
+        Qofnu=Qofnu/trace.shape[0]
 
         ##### Calculate the covariance matrix
         cov = tr.zeros((self.x_grid.shape[0],self.x_grid.shape[0]))
         covnu=tr.zeros((nn.shape[0],nn.shape[0]))
         #Z=tr.tensor([0.0])
         for i in range(trace.shape[0]):
-            pd_args = tuple(trace[i,:self.Npd_args])
-            k_args = tuple(trace[i,self.Npd_args:])
+            if self.mode=="kernel":
+                k_args = tuple(trace[i,:])
+                pd_args = self.pd_args
+            elif self.mode=="mean":
+                pd_args = tuple(trace[i,:])
+                k_args = self.ker_args
+            else:
+                pd_args = tuple(trace[i,:self.Npd_args])
+                k_args = tuple(trace[i,self.Npd_args:])
             #E=self.nlpEvidence(pd_args,k_args)#/2.0
             if self.flag=="yes":
                 sig = k_args[-1]
@@ -223,7 +244,8 @@ class GaussianProcess():
                 k_args = k_args[:-1]
             else:
                 sig = 1.0
-            K = self.Ker(self.x_grid,*k_args)
+            K = self.Ker(self.x_grid,*k_args) #+ self.reg_ma*tr.eye(self.x_grid.shape[0]).to(self.device)
+            #K=(K+K.T)/2.0
             Pd = self.Pd(self.x_grid,*pd_args)
             if self.flag=="yes":
                 Chat = self.Gamma*(1-self.mask) + (sig**2)*self.mask*self.Gamma +self.V@K@self.V.T
@@ -231,7 +253,14 @@ class GaussianProcess():
                 Chat = self.Gamma + self.V@K@self.V.T
             iChat = tr.linalg.inv(Chat)
             VK = self.V@K
+            #L=tr.linalg.cholesky(Chat)
+            #X=tr.linalg.solve(L,VK)
+
+            #CpMat = K - X.T@X
             CpMat = K - VK.T@iChat@VK
+            CpMat=(CpMat+CpMat.T)/2.0 #+ 1e-11*tr.eye(CpMat.shape[0]).to(self.device)
+            #Y=tr.linalg.solve(L,self.Y-self.V@Pd)
+            #Pm = Pd +X.T@Y
             Pm = Pd +VK.T@iChat@(self.Y-self.V@Pd)#I dont need to calculate Pm again but ok
             
             CnuMat= iB@CpMat@iB.T
@@ -246,9 +275,12 @@ class GaussianProcess():
             Qv=meannu.view(1,meannu.shape[0])
             Qvv=meannu.view(meannu.shape[0],1)
 
-            cov+=(CpMat+(qx)*(qxx))/trace.shape[0]
-            covnu+=(CnuMat+(Qv)*(Qvv))/trace.shape[0]
-            
+
+            cov+=(CpMat+(qx)*(qxx))#/trace.shape[0]
+            covnu+=(CnuMat+(Qv)*(Qvv))#/trace.shape[0]
+        
+        cov=cov/trace.shape[0]
+        covnu=covnu/trace.shape[0]
 
         return qofx,cov,Pms,Qofnu,covnu,Qnu
 
@@ -263,19 +295,26 @@ class GaussianProcess():
             k_args = k_args[:-1]
         else:
             sig = 1.0
-        K = self.Ker(self.x_grid,*k_args)
+        K = self.Ker(self.x_grid,*k_args)+ self.reg * tr.eye(self.x_grid.shape[0]).to(self.device)
+        K=(K+K.T)/2.0+ 1e-11*tr.eye(K.shape[0]).to(self.device)
+        #K=truncatecovtorch(K)
         Pd = self.Pd(self.x_grid,*pd_args)
         
         Chat = self.Gamma*(1-self.mask) + (sig**2)*self.Gamma*self.mask + self.V@K@self.V.T
+        #Chat=truncatecovtorch(Chat)
+        L=tr.linalg.cholesky(Chat)
 
-        iChat = tr.linalg.inv(Chat)
-        self.Chat = Chat.to(self.device)
-        self.iChat = iChat
+        #iChat = tr.linalg.inv(Chat)
+        #self.Chat = Chat.to(self.device)
+        #self.iChat = iChat
         #print(Y,self.V,Pd)
         D = self.Y - self.V@Pd
+        X=tr.linalg.solve(L,D)
+
         # no need for D.T@iChat@D D.@iChat@D does the job...
-        sign,logdet = tr.linalg.slogdet(Chat)
-        nlp = 0.5*(D@iChat@D + sign*logdet) #+ 0.5*self.Gamma.shape[0]*np.log(2.0*np.pi)
+        #sign,logdet = tr.linalg.slogdet(Chat)
+        #nlp = 0.5*(D@iChat@D + sign*logdet) #+ 0.5*self.Gamma.shape[0]*np.log(2.0*np.pi)
+        nlp= 0.5*(X@X.T+ 2*tr.logdet(L))
         return nlp
     
     def train(self,Nsteps=100,lr=0.4,mode="all",function="evidence"):
@@ -343,7 +382,7 @@ class GaussianProcess():
         self.losses=losses
         return losses
     
-    def prior2ndlevel(self,mode,Nsam,mean,sigma,prior_mode=tr.tensor([1,2])):
+    def prior2ndlevel(self,mode,al,mean,sigma,prior_mode=tr.tensor([1,2])):
         #remember that prior mode define the type of prior for each parameter 0=gaussian, 1=lognormal, 2=expbeta
 
         self.mode=mode
@@ -377,7 +416,7 @@ class GaussianProcess():
                 else:
                     self.prior_dist.append(lognormal(mean[i],cov[i,i],self.device,0.0))
             else:
-                self.prior_dist.append(expbeta(-0.9,-0.9,mean[i],cov[i,i], self.device))
+                self.prior_dist.append(expbeta(-al,-al,mean[i],cov[i,i], self.device))
 
     def hyperparametersvalues(self,burn=100,set="original"):
         #Mean and standard deviation of the hyperparameters
@@ -410,17 +449,21 @@ class GaussianProcess():
         if self.mode=="kernel":
             kx = X.to(self.device)
             likelihood = tr.exp(-self.nlpEvidence(p_x,kx))
-            for j in range(self.Npd_args,self.Nparams):
+            nx=0
+            for hyperprior in self.prior_dist:
 
-                prior*= self.prior_dist[j].pdf(kx[j-self.Npd_args])
+                prior*= hyperprior.pdf(kx[nx])
+                nx=nx+1
 
 
 
         elif self.mode=="mean":
             px = X[:self.Npd_args].to(self.device)
             likelihood = tr.exp(-self.nlpEvidence(px,k_x))
-            for i in range(self.Npd_args):
-                prior*= self.prior_dist[i].pdf(px[i])
+            nx=0
+            for hyperprior in self.prior_dist:
+                prior*= hyperprior.pdf(px[nx])
+                nx=nx+1
             #prior= self.prior_pd.pdf(px)
             #prior= tr.exp(self.prior_pd.log_prob(px))
 
@@ -442,7 +485,7 @@ class GaussianProcess():
         #print(self.post2levelpdf(X))
         return -tr.log(self.post2levelpdf(X))
     
-    def gradlogpost2levelpdf(self,X):#this is calculated for noisy data yet
+    def gradlogpost2levelpdf(self,X):#This only works for the sum of kernels rbf+logrbf, the intention is to transform this into a contructor of gradient functions
         px=X[:self.Npd_args]
         px=tuple(px)
         kx=X[self.Npd_args:self.Nker_args+self.Npd_args]
@@ -480,9 +523,16 @@ class GaussianProcess():
         return tr.tensor(gradEvi,dtype=tr.float32)
 
 
+def truncatecovtorch(cov):
+    svd=tr.svd(cov)
+    med=tr.median(svd[1])
+    optimal=med*4/tr.sqrt(tr.tensor([3.0]))
+    #svd[1][svd[1]<optimal]=0
+    svd[1]=tr.where(svd[1] < optimal, tr.tensor([0.0]), svd[1])
+    return svd[0] @ tr.diag(svd[1]) @ svd[2]
+
+
 #### MODELS ####
-
-
 class simple_PDF():
     def __init__(self,a,b,g): 
         self.a=a
@@ -546,7 +596,7 @@ def pseudo_data(nu,a,b,g,da,db,dg,N):
     return D+NN
 
 
-#### Kernels #####
+#### KERNELS #####
 def KrbfMat(x,s,w):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
@@ -556,6 +606,7 @@ def KrbfMat(x,s,w):
 def Sig(x,scale,sp=0.1):
     ss=scale**2
     return tr.special.expit(scale*(x-sp))
+
 def transform(s):
     return s.view(s.shape[1],1).repeat(1,s.shape[1])
 
@@ -634,15 +685,6 @@ def Kcom_ds(x,s1,w1,s2,w2,scale,sp=0.1,eps=1e-12):
     return F1+F2
 
 
-def R(z,t):
-    return 1.0/tr.sqrt(1-2*z*t+t*t)
-
-def jacobi(x,s,t,a,b):
-   x=x.view(x.shape[0],1)
-   y=x.view(1,x.shape[0])
-   return (s**2)*(x*y)**a*((1-x)*(1-y))**b*(R(2*x-1,t)*R(2*y-1,t)*((1-t+R(2*x-1,t))*(1-t+R(2*y-1,t)))**a*((1+t+R(2*x-1,t))*(1+t+R(2*y-1,t)))**b)**(-1)
-
-
 class FE_Integrator:
     def __init__(self,x):
         self.N = x.shape[0]
@@ -706,7 +748,7 @@ class FE_Integrator:
 # quadratic finite elements are more complicated...
 # ... but now it works!
 # also I should try the qubic ones too
-class FE2_Integrator:
+class FE2_Integrator1:
     def __init__(self,x):
         self.N = x.shape[0]
         xx = np.append(x,[2.0*x[self.N-1] - x[self.N-2], 3.0*x[self.N-1]-2*x[self.N-2],0] )
@@ -791,6 +833,110 @@ class FE2_Integrator:
         return I
 
 
+#It only work for odd number of points
+class FE2_Integrator:
+    def __init__(self,x):
+        self.N = x.shape[0]
+        #new grid
+        xx = np.append(x,[2.0*x[self.N-1] - x[self.N-2], 3.0*x[self.N-1]-2*x[self.N-2]] )
+        #self.x = np.append([-x[0],0],xx)
+        self.x = xx#np.append(0,xx)
+        self.eI = 0
+
+        self.Norm = np.empty(self.N)
+        for i in range(self.N):
+            self.Norm[i] = self.ComputeI(i, lambda x : 1)
+            
+    def pulse(self,x,x1,x2):
+        return np.heaviside(x-x1,1.0)* np.heaviside(x2-x,1.0)
+    
+    def f(self,x,i):
+        R=0.0
+        ii =i#+1
+        if(i==0):
+            #R=self.pulse(x,self.x[0],self.x[1])
+            #R=self.pulse(x,self.x[1],self.x[2])
+        #    R+=(x- self.x[2])/(self.x[1] -self.x[2])*self.pulse(x,self.x[1],self.x[2])
+            R+=(x- self.x[1])*(x- self.x[2])/((self.x[0] -self.x[2])*(self.x[0]-self.x[1]))*np.heaviside(x-self.x[0],1.0)* np.heaviside(self.x[2]-x,1.0)
+            #self.pulse(x,self.x[0],self.x[3])
+            #print(i,R,x,(x- self.x[2])*(x- self.x[3])/((self.x[1] -self.x[3])*(self.x[1]-self.x[2])),np.heaviside(x-self.x[3],1.0)* np.heaviside(self.x[0]-x,1.0))
+            return R
+        elif(i==self.N-1):
+            R += (x- self.x[ii-2])*(x- self.x[ii-1])/((self.x[ii] -self.x[ii-2])*(self.x[ii] -self.x[ii-1]))*self.pulse(x,self.x[ii-2],self.x[ii])
+            return R
+        
+        if((ii+1)%2==0):#Even
+            R  += (x- self.x[ii-1])*(x- self.x[ii+1])/((self.x[ii] -self.x[ii+1])*(self.x[ii] -self.x[ii-1]))*self.pulse(x,self.x[ii-1],self.x[ii+1])
+            return R
+        else:#odd?
+            R += (x- self.x[ii-2])*(x- self.x[ii-1])/((self.x[ii] -self.x[ii-2])*(self.x[ii] -self.x[ii-1]))*self.pulse(x,self.x[ii-2],self.x[ii  ])
+            R += (x- self.x[ii+1])*(x- self.x[ii+2])/((self.x[ii] -self.x[ii+2])*(self.x[ii] -self.x[ii+1]))*self.pulse(x,self.x[ii],self.x[ii+2])
+            return R
+
+    
+    def set_up_basis(self,newgrid):
+        res = np.empty(newgrid.shape[0])
+        for i in range(newgrid.shape[0]):
+            res[i] = 0.0
+            for j in range(self.N):
+                res[i] += self.f(newgrid[i],j)#*self.Norm[j]
+        return res
+    
+    def set_up_integration(self,Kernel = lambda x: 1):
+        res = np.empty(self.N)
+        for i in range(self.N):
+            res[i] = self.ComputeI(i,Kernel)
+        return res
+    
+        
+    # assume symmetrix function F(x,y) = F(y,x)
+    # for efficiency 
+    def set_up_dbl_integration(self,Kernel = lambda x,y: 1):
+        res = np.empty([self.N,self.N])
+        for i in range(self.N):
+            for j in range(i,self.N):
+                res[i,j] = self.ComputeIJ(i,j,Kernel)
+                res[j,i]  = res[i,j]
+        return res
+
+
+    def ComputeI(self,i,Kernel):
+        eps=1e-12
+        if(i==0):
+            I,eI = integrate.quad(lambda x: Kernel(x)*self.f(x,0), self.x[0], self.x[2],epsabs=eps)
+            self.eI += eI
+            return I
+        if(i==self.N):
+            I,eI = integrate.quad(lambda x: Kernel(x)*self.f(x,self.N-1), self.x[self.N-3], self.x[self.N-1],epsabs=eps)
+            self.eI += eI
+        ii=i
+        if((ii+1)%2==0):
+            I,eI = integrate.quad(lambda x: Kernel(x)*self.f(x,i), self.x[ii-1], self.x[ii+1],epsabs=eps)
+            self.eI += eI
+        else:
+            I,eI = integrate.quad(lambda x: Kernel(x)*self.f(x,i), self.x[ii-2], self.x[ii+2], epsabs=eps)
+            self.eI += eI
+        return I
+    
+    def ComputeIJ(self,i,j,Kernel):
+        # I need to fix the i=0 case
+        ii=i+1
+        jj=j+1
+        if(ii%2==0):
+            xx = (self.x[ii-1], self.x[ii+1])
+        else:
+            xx = (self.x[ii-2], self.x[ii+2])
+        if(jj%2==0):
+            yy = (self.x[jj-1], self.x[jj+1])
+        else:
+            yy = (self.x[jj-2], self.x[jj+2])
+        
+        I,eI = integrate.dblquad(lambda x,y: self.f(x,i)*Kernel(x,y)*self.f(y,j), yy[0], yy[1],xx[0], xx[1],epsrel=1e-12)
+        self.eI += eI
+
+        return I
+
+
 #### Probablity Distributions ####
 ###################################
 class lognormal():
@@ -869,7 +1015,7 @@ class expbeta():
         integration_domain = [[self.shift, self.shift+self.scale]]
         vegas = Simpson()
         result = vegas.integrate(self.Unpdf, dim=1, N=9999, integration_domain=integration_domain)
-        self.norm=result.unsqueeze(0).requires_grad_(True)
+        self.norm=result.unsqueeze(0)#.requires_grad_(True)
     
     def pdf(self,x):
         #

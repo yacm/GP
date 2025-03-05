@@ -42,11 +42,24 @@ class HMC_sampler():
                     return q0,p0,0
                 q = q + self.eps * p
                 if i!=self.L-1:
-                    if tr.isinf(self.logfunc(q)).item():
-                        #print('rejected in leapfrog 2')
+                    try:
+                        logfunc= self.logfunc(q)
+                        if tr.isinf(logfunc).item():
+                            #print('rejected in leapfrog 1')
+                            return q0,p0,0
+                        else:
+                            p = p - self.eps *autograd(self.logfunc,q)
+                    except tr._C._LinAlgError:
+                        print('Your cholesky decomposition is not positive definite or has divergent values')
+                        #print('rejected in leapfrog 1')
                         return q0,p0,0
-                    else:
-                        p = p - self.eps *autograd(self.logfunc,q)
+                        
+                    #if tr.isinf(self.logfunc(q)).item():
+                        #print('rejected in leapfrog 2')
+                    #    return q0,p0,0
+                    
+                    #else:
+                    #    p = p - self.eps *autograd(self.logfunc,q)
             p = p - self.eps/2.0 * autograd(self.logfunc,q)
             #reversibility
             #p = -p

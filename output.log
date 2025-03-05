@@ -1,3 +1,0 @@
-Memory allocated per node: 1024 MB
-CPUs allocated per node: 2
-SLURM_MEM_PER_CPU: Undefined variable.
