@@ -4,8 +4,8 @@
 #SBATCH --time=72:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --output=/sciclone/pscr/yacahuanamedra/ToDo/output.log
-#SBATCH --error=/sciclone/pscr/yacahuanamedra/ToDo/output.log
+#SBATCH --output=/sciclone/scr-lst/yacahuanamedra/GP/ToDo/run1.log
+#SBATCH --error=/sciclone/scr-lst/yacahuanamedra/GP/ToDo/run1.log
 
 
 if [ "$#" -ne 8 ]; then
@@ -32,7 +32,15 @@ fi
 CPU=$((TIMES - 1)) #How many CPUs are you going to use
 ITER=$((ITERATIONS / TIMES)) #How many iterations per cpu are you going to produce
 #NEWSLURMID=$SLURM
+BURN=$((ITER/10))
 AA=$((II + 1))
+# if hostname is fm then exclude fm04,fm08
+if [[ $(hostname) == fm* ]]; then
+    EXCLUDE="fm04,fm08,fm24"
+else
+    EXCLUDE=""
+fi
+
 # Create the folder if it doesn't exist
 mkdir -p "${MODEL}_${KERNEL_NAME}(${mode}+${grid})"
 
@@ -40,21 +48,32 @@ mkdir -p "${MODEL}_${KERNEL_NAME}(${mode}+${grid})"
 SLURM_SCRIPT="${MODEL}_${KERNEL_NAME}(${mode}+${grid})/job_script.slurm"
 
 cat << EOF > $SLURM_SCRIPT
-#!/bin/tcsh
+#!/bin/bash
 
 #SBATCH --job-name=${MODEL}_${KERNEL_NAME}(${mode}+${grid})${ITD}(z=${AA}a)
-#SBATCH --output=/sciclone/pscr/yacahuanamedra/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs/GP${ITD}(z=${AA}a)_%a.log
-#SBATCH --error=/sciclone/pscr/yacahuanamedra/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs/GP${ITD}(z=${AA}a)_%a.log
+#SBATCH --output=/sciclone/scr-lst/yacahuanamedra/GP/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs1/GP${ITD}(z=${AA}a)_%a.log
+#SBATCH --error=/sciclone/scr-lst/yacahuanamedra/GP/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs1/GP${ITD}(z=${AA}a)_%a.log
 #SBATCH --time=72:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --array=0-${CPU}
 #SBATCH --mem=1000M
+#SBATCH --exclude=${EXCLUDE}
 
+source ~/.bashrc
 module load miniforge3/24.9.2-0
+conda init
+sleep 5
 conda activate gptorch
 
-python3 run.py --i ${II} --Nsamples ${ITER}  --L 100 --eps 0.001 --ITD ${ITD} --mean ${MODEL} --ker ${KERNEL_NAME} --mode ${mode}  --IDslurm \$SLURM_ARRAY_TASK_ID --grid ${grid} --Nx 256
+echo "Running on node: \$(hostname)"
+echo "Running on CPUs: \$(scontrol show hostnames \$SLURM_NODELIST)"
+echo "SLURM job ID: \$SLURM_JOB_ID"
+echo "SLURM job name: \$SLURM_JOB_NAME"
+echo "SLURM array job ID: \$SLURM_ARRAY_JOB_ID"
+echo "SLURM array task ID: \$SLURM_ARRAY_TASK_ID"
+
+python3 run.py --i ${II} --Nsamples ${ITER} --burn ${BURN} --L 600 --eps 0.001 --ITD ${ITD} --mean ${MODEL} --ker ${KERNEL_NAME} --mode ${mode}  --IDslurm \$SLURM_ARRAY_TASK_ID --grid ${grid} --Nx 256
 EOF
 
 # Submit the job

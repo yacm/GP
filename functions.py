@@ -18,6 +18,7 @@ from sklearn.pipeline import Pipeline
 import scipy.special
 import datetime
 from GP import *
+import re
 
 def get_dist_matelem(z, p, t_min,ITD="Re"):
     f = 0
@@ -63,6 +64,288 @@ def get_data(ITD):
     rMe = np.std(rMj,axis=0)*np.sqrt(Nj) 
     return nu,rMj,rMe,rM
 
+def restart(fits_comb):
+    number=len(fits_comb)
+    for i in range(0,number):
+        fits_comb[i].hyperparametersvalues()
+def train_model(fits_comb,Ntrain,function,lr,mode):
+    start=time.time()
+    number=len(fits_comb)
+    for i in range(0,number):
+        #mode =fits_comb[i].mode
+        #print(fits_comb[i].mode)
+        if i in [12,13,14]:
+            fits_comb[i].train(Ntrain,lr=lr,mode=mode,function=function)
+        else:
+            fits_comb[i].train(1,lr=1e-4,mode=mode,function=function)
+        print(tr.tensor(fits_comb[i].pd_args +fits_comb[i].ker_args  + (fits_comb[i].sig,)),flush=True)
+    end=time.time()
+    print("time",end-start)
+
+
+def plottrained(fit,iB,nn,zs):
+
+    fCI=1.00
+    number=15
+    PDFpos=1
+    ITDpos=0
+    col = ["#332288","#117733","#EF8738", "#CC6677","#88CCEE", "#882255","#44AA99","#999933","#AA4499", "#661100", "#6699CC", "#F0E442","#332288","#117733","#EF8738", "#CC6677","#88CCEE", "#882255","#44AA99","#999933","#AA4499", "#661100", "#6699CC", "#F0E442",]
+    col
+    for z in zs:
+        fig,ax=plt.subplots(1,2,figsize=(18, 10.5))
+        x_grid=fit[z].x_grid
+
+        p,Cp = fit[z].ComputePosterior()
+        p,Cp = p.to("cpu"),Cp.to("cpu")
+        Cp = 0.5*(Cp+Cp.T)
+        svd=np.linalg.svd(Cp)
+        Cp=svd[0] @ np.diag(np.abs(svd[1])) @ svd[2]
+        Cp=0.5*(Cp+Cp.T) +1e-6*np.eye(Cp.shape[0])#regulate the posterior covariance
+        pdfMc= np.random.multivariate_normal(p,Cp,(500,))
+        ax[0].plot(x_grid,p,label=fit[z].name+' training steps: '+str(fit[z].trainingcount),color=col[z])
+        perror=1.0*np.diag(Cp)**(0.5)
+        #p=fits_comb[i].Pd(fits_comb[i].x_grid.cpu(),*fits_comb[i].pd_args).numpy()
+        ax[0].fill_between(x_grid, p - perror, p + perror, facecolor=col[z], alpha=0.3)
+        ax[0].legend()
+        ax[0].set_ylim([-0.3,6])
+        ttQ = pdfMc@iB.T
+        covnu= np.cov(ttQ.T)
+        mttQ = ttQ.mean(axis=0)
+        #ax[1].plot(nn,ttQ.T,color=col[z],alpha=0.05)
+        ax[1].plot(nn,mttQ,color=col[z])
+        ax[1].fill_between(nn, mttQ - fCI*np.sqrt(np.diag(covnu)), mttQ + fCI*np.sqrt(np.diag(covnu)), facecolor=col[z], alpha=0.3)
+        if z >=12:
+            if fit[z].ITD=="Re":
+                MMM='real'
+            elif fit[z].ITD=="Im":
+                MMM='imag'
+            if z==12:
+                datanu=np.loadtxt('NNPDF/NNPDF40_nnlo_as_01180_1000_itd_'+MMM+'_numax4.dat',dtype=np.float64)
+            elif z==13:
+                datanu=np.loadtxt('NNPDF/NNPDF40_nnlo_as_01180_1000_itd_'+MMM+'_numax10.dat',dtype=np.float64)
+            elif z==14:
+                datanu=np.loadtxt('NNPDF/NNPDF40_nnlo_as_01180_1000_itd_'+MMM+'_numax25.dat',dtype=np.float64)
+
+            nu_d_grid = datanu.T[1]
+            
+            M=datanu.T[2:].mean(axis=0)
+            eMnu=datanu.T[2:].std(axis=0)#*np.sqrt(M.shape[0]-1)
+            ax[1].errorbar(nu_d_grid,M,eMnu,fmt='.',alpha=0.5,label=fit[z].name,color='red')
+            #save this plots fig
+            ax[1].set_xlabel(r"$n_\nu$")
+            ax[1].set_ylabel(r"$\langle I_{n_\nu} \rangle$")
+            ax[0].set_xlabel(r"$x$")
+            ax[0].set_ylabel(r"$f(x)$")
+            ax[0].set_title("PDF")
+            ax[1].set_title("ITD")
+            ax[1].legend()
+            ax[0].legend()
+    #fig.savefig(fit[z].name+'_grid'+fit[z].gridname+'.pdf',bbox_inches='tight')    
+
+def Modelaveraging_importantsampling_gauss(fits_comb,nn,Nsamp,iB,list):
+    samplesqx=[]
+    samplesQv=[]
+    qofxs=[]
+    Qofvs=[]
+    covs=[]
+    covsnu=[]
+    print(f'### INITIALIZE MODEL AVERAGING {fits_comb[0].modelname}_{fits_comb[0].kernelname}({fits_comb[0].ITD}_{fits_comb[0].mode}) ###')
+    #remember that for Im(M) the range goes to 12 because there is no mock data set
+    for i in range(len(fits_comb)):
+        if fits_comb[i].name in ['z=NNPDF(4)','z=NNPDF(10)','z=NNPDF(25)']:
+            #fits_comb[i].trace=filtered_traces[i][::filtered_traces[i].shape[0]//nnn]
+            qofx,cov,pms,Qofv,covnu,Qvs=fits_comb[i].model_averaging_IS(Nsamp,nn,iB,prob=True,fullevi=True)
+        else:
+            #placeholder for the other models
+            #fits_comb[i].trace=filtered_traces[i][::filtered_traces[i].shape[0]//10]
+            qofx,cov,pms,Qofv,covnu,Qvs=fits_comb[i].model_averaging_IS(2,nn,iB,prob=True,fullevi=True)
+        pms=tr.stack(pms)
+        Qvs=tr.stack(Qvs)
+        #samplesqx.append(pms)
+        #samplesQv.append(Qvs)
+        qofxs.append(qofx)
+        Qofvs.append(Qofv)
+        covs.append(cov)
+        covsnu.append(covnu)
+        print("Model Averaging Important Sampling (2nd level)",fits_comb[i].name,"done",flush=True)
+    #return samplesqx,samplesQv,qofxs,Qofvs,covs,covsnu
+    return qofxs, Qofvs, covs, covsnu
+
+
+def save_data(fits_comb,data):
+    qofxs, Qofvs, covs, covsnu = data
+
+    for i in range(len(fits_comb)):
+        #fits_comb[i].trace=filtered_traces[i][::filtered_traces[i].shape[0]//nnn]
+        filepath = os.path.join(
+            f"{fits_comb[i].modelname}_{fits_comb[i].kernelname}({fits_comb[i].mode}+{fits_comb[i].gridname})",
+            f"data_{fits_comb[i].ITD}"
+        )
+        #create directory if it does not exist
+        try:
+            #permisions for creating directory
+            os.makedirs(filepath, exist_ok=True, mode=0o755)
+        except Exception as e:
+            print(f"Error creating directory {filepath}: {e}")
+            continue
+        try:
+            #save samplesqx[i].to("cpu")
+            #tr.save(samplesqx[i].to("cpu"), f"{filepath}/samplesqx_{i+1}.pt")
+            #tr.save(samplesQv[i].to("cpu"), f"{filepath}/samplesQv_{i+1}.pt")
+            tr.save(qofxs[i].to("cpu"), f"{filepath}/qofx_{fits_comb[i].name}.pt")
+            tr.save(Qofvs[i].to("cpu"), f"{filepath}/Qofv_{fits_comb[i].name}.pt")
+            tr.save(covs[i].to("cpu"), f"{filepath}/cov_{fits_comb[i].name}.pt")
+            tr.save(covsnu[i].to("cpu"), f"{filepath}/covnu_{fits_comb[i].name}.pt")
+        except Exception as e:
+            print(f"Error saving data for {fits_comb[i].ITD} {fits_comb[i].name}, {fits_comb[i].modelname}, {fits_comb[i].kernelname} {fits_comb[i].mode} {fits_comb[i].gridname}: {e}")
+            continue
+
+
+def redefine_kernel(fit_test,iB,pval):
+    numax=-1
+    for i in range(len(fit_test)):
+        if fit_test[i].name in ['z=NNPDF(4)','z=NNPDF(10)','z=NNPDF(25)']:
+            flag=False
+            print("##### Name of the fit",fit_test[i].name,flush=True)
+            #transform to tuple
+            DeltaM=tr.diag(fit_test[i].Gamma).numpy()[numax]**0.5
+            absM=np.abs(fit_test[i].Y.numpy()[numax])
+            maxi=np.maximum((1+pval)*DeltaM,pval*absM)
+            sigeps=tr.linspace(1.0,5.0,50)
+            leps=tr.linspace(1.0,0.05,20)
+            for jj in range(0,sigeps.shape[0]):
+                for kk in range(0,leps.shape[0]):
+                    #print("type",DeltaM.dtype,absM.dtype)
+                    #shapes
+                    #print("shapes",DeltaM.shape,absM.shape,DeltaM,absM)
+
+                    #print("maxi",maxi)
+                    p,Cp= fit_test[i].ComputePosterior()
+                    p,Cp = p.to("cpu"),Cp.to("cpu")
+                    #print("p",p.shape,"Cp",Cp.shape)
+                    Cp = 0.5*(Cp+Cp.T)
+                    svd=np.linalg.svd(Cp)
+                    Cp=svd[0] @ np.diag(np.abs(svd[1])) @ svd[2]
+                    Cp=0.5*(Cp+Cp.T) +1e-6*np.eye(Cp.shape[0])#regulate the posterior covariance
+                    pdfMc= np.random.multivariate_normal(p,Cp,(500,))
+                    M=pdfMc@ iB.T
+                    ttQ = pdfMc@iB.T
+                    covnu= np.cov(ttQ.T)
+                    mttQ = ttQ.mean(axis=0)
+
+
+                    DeltaM_th= np.max(np.diag(covnu)**0.5).item()
+                    #print("deltaM_th",DeltaM_th,"DeltaM",DeltaM,"absM",absM)
+                    if DeltaM_th>=maxi:
+                        flag=True
+                        break
+                    
+                    else:
+                        fit_test[i].ker_args=tr.tensor(fit_test[i].ker_args)
+                        fit_test[i].ker_args[0]=sigeps[jj]**2
+                        fit_test[i].ker_args[1]=leps[kk]
+                        continue
+                if flag:
+                    print("values of the params",fit_test[i].ker_args,flush=True)
+                    print("pass the test",flush=True)
+                    fit_test[i].ker_args=tuple(fit_test[i].ker_args)
+                    print("Parameters changed")
+                    break
+                #fit_test[i].ker_args[0]=tr.tensor(3.0)
+                #fit_test[i].ker_args[1]=tr.log(tr.log(tr.tensor(2.5)))
+                #print(fit_test[i].ker_args)
+                #print(DeltaM_th,(1+p)*DeltaM,p*absM)
+
+            #print(fit_test[i].ker_args[0],fit_test[i].ker_args[1])
+            fit_test[i].ker_args=tuple(fit_test[i].ker_args)
+            print("fail for the model", fit_test[i].modelname,flush=True)
+            print(fit_test[i].ker_args,flush=True)
+
+    return fit_test
+
+
+def load_data_usesamples(fits_comb):
+    samplesqx = []
+    samplesQv = []
+    qofxs = []
+    Qofvs = []
+    covs = []
+    covsnu = []
+
+    for i in range(0, 15):
+        filepath = f"/{fits_comb[i].modelname}_{fits_comb[i].kernelname}({fits_comb[i].mode}+{fits_comb[i].gridname})/data_{fits_comb[i].ITD}"
+        filepath = os.path.join(
+            f"{fits_comb[i].modelname}_{fits_comb[i].kernelname}({fits_comb[i].mode}+{fits_comb[i].gridname})",
+            f"data_{fits_comb[i].ITD}"
+        )
+        try:
+            samplesqx.append(tr.load(f"{filepath}/samplesqx_{i+1}.pt"))
+            samplesQv.append(tr.load(f"{filepath}/samplesQv_{i+1}.pt"))
+            qofxs.append(tr.load(f"{filepath}/qofx_{i+1}.pt"))
+            Qofvs.append(tr.load(f"{filepath}/Qofv_{i+1}.pt"))
+            covs.append(tr.load(f"{filepath}/cov_{i+1}.pt"))
+            covsnu.append(tr.load(f"{filepath}/covnu_{i+1}.pt"))
+        except Exception as e:
+            print(f"Error loading data for {fits_comb[i].ITD} {fits_comb[i].name}, {fits_comb[i].modelname}, {fits_comb[i].kernelname} {fits_comb[i].mode} {fits_comb[i].gridname}: {e}")
+            continue
+    return samplesqx, samplesQv, qofxs, Qofvs, covs, covsnu
+
+def MC(func,point,Nsamp,epsilon=None,bar=False):
+    d=point.shape[0]
+    trace = tr.zeros(Nsamp,d) #trace of the samples
+    old_prob = func(point) #probability of the old point
+    old_x = point #old point
+    #delta = np.random.normal(0,0.5,Nsamp) #trial distribution
+    if epsilon is None:
+        #delta = tr.normal(0,0.5,(Nsamp,d))
+        delta = tr.distributions.multivariate_normal.MultivariateNormal(tr.zeros(d), 0.5*tr.eye(d)).sample((Nsamp,))
+    else:
+        #delta = tr.normal(0,0.5,(Nsamp,d)) #trial distribution
+        cov=tr.diag(epsilon)
+        delta = tr.distributions.multivariate_normal.MultivariateNormal(tr.zeros(d), cov).sample((Nsamp,)) #trial distribution
+        #delta = np.random.uniform(-0.5,0.5,Nsamp) #trial distribution
+    
+    accepted=0
+    if bar==True:
+        for i in tqdm(range(Nsamp)):
+            new_x = old_x + delta[i]
+            new_prob = func(new_x)
+            acceptance = new_prob/old_prob
+            if(acceptance>np.random.uniform(0,1)):
+                trace[i] = new_x
+                old_x = new_x
+                old_prob = new_prob
+                accepted=accepted+1
+            else:
+                trace[i] = old_x # remain in the same state
+    else:
+        for i in range(Nsamp):
+            new_x = old_x + delta[i]
+            new_prob = func(new_x)
+            acceptance = new_prob/old_prob
+            if(acceptance>np.random.uniform(0,1)):
+                trace[i] = new_x
+                old_x = new_x
+                old_prob = new_prob
+                accepted=accepted+1
+            else:
+                trace[i] = old_x
+    print("Acceptance rate: ", accepted/Nsamp)
+    return trace
+
+#load trained parameters
+def load_trained(fits_comb,ITD,modelname,kernelname,grid):
+    number=len(fits_comb)
+    basepath=f"/sciclone/scr-lst/yacahuanamedra/GP/{modelname}_{kernelname}({fits_comb[0].mode}+{grid})/min"
+    for i in range(0,number):
+        file_name = f"K{ITD}({fits_comb[i].name})(train).pt"
+        file_path = os.path.join(basepath, file_name)
+        try:
+            fits_comb[i].pd_args = tr.load(file_path)[0:fits_comb[i].Npd_args]
+            fits_comb[i].ker_args = tr.load(file_path)[fits_comb[i].Npd_args:]
+            print(f"Trained parameters loaded from: {file_path}")
+        except Exception as e:
+            print(f"Error loading {file_path}: {e}")
 
 def plothist(trace,mygp1,disc,params="model+kernel+noise",prior=False,burn=100,kernel='jacobi'):
     fig, ax = plt.subplots(trace.shape[1], 1, figsize=(10, 10), sharex=False, sharey=False)
@@ -175,6 +458,20 @@ def plotrace(trace,burn=100,kernel='jacobi'):
 def tensor2list(tensor):
     return [tensor[i].item() for i in range(tensor.shape[0])]
 
+
+def compute_mode_per_column(samples: tr.Tensor, decimals: int = 3):
+    # Round values to reduce float uniqueness
+    rounded = tr.round(samples * 10**decimals) / 10**decimals
+    modes = []
+    counts = []
+
+    for col in rounded.T:  # iterate over parameters
+        values, freq = tr.unique(col, return_counts=True)
+        max_idx = tr.argmax(freq)
+        modes.append(values[max_idx])
+        counts.append(freq[max_idx])
+
+    return tr.stack(modes), tr.stack(counts)
 
 ##integrator
 class FE_Integrator:
@@ -464,7 +761,7 @@ def dNorm(P):
     return tr.tensor([dG_da,dG_db])
 
 
-def PDFnormed(x,a,b):
+def PDFn(x,a,b):
     return tr.pow(x,a)*tr.pow(1-x,b)*tr.exp(gammaln(a+b+2) - gammaln(a+1) - gammaln(b+1))
 #x**a*(1-x)**b*tr.exp(gammaln(a+b+2) - gammaln(a+1) - gammaln(b+1))
 
@@ -527,6 +824,13 @@ def dNorm(P):
 def PDF_N(x,a,b,N):
     return N*tr.pow(x,a)*tr.pow(1-x,b)*tr.exp(gammaln(a+b+2) - gammaln(a+1) - gammaln(b+1))
 
+def PDF_con(x,b):
+    a=tr.tensor(0.25)
+    return tr.pow(x,a)*tr.pow(1-x,b)*tr.exp(gammaln(a+b+2) - gammaln(a+1) - gammaln(b+1))
+
+def PDF_div(x,b):
+    a=tr.tensor(-0.5)
+    return tr.pow(x,a)*tr.pow(1-x,b)*tr.exp(gammaln(a+b+2) - gammaln(a+1) - gammaln(b+1))
 #xtensor=tr.tensor(x_grid)
 def model(x):
     a=x[0]
@@ -534,8 +838,11 @@ def model(x):
     xtensor=tr.tensor([0.5])
     return PDF_N(xtensor,a,b)
 
-def ModelC(x,N):
+def g_flat(x,N):
     return x-x+N
+
+def noModel(x,N):
+    return x-x+N*0
 
 def PDF(x,a,b,N):
     return N*tr.pow(x,a)*tr.pow(1-x,b)
@@ -545,23 +852,49 @@ def PDF(x,a,b,N):
 def KrbfMat(x,s,w):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
-    return (s**2)*tr.exp(-0.5*((xx - yy)/w)**2)
+    return (s)*tr.exp(-0.5*((xx - yy)/w)**2)
+
+def KrbfMatxa(x,s,w,a):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return (s)*xx**a*tr.exp(-0.5*((xx - yy)/w)**2)*yy**a
+
+def KrbfMatxab(x,s,w,a,b):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return (s)*xx**a*(1-xx)**b*tr.exp(-0.5*((xx - yy)/w)**2)*yy**a*(1-yy)**b
+
+def rbf_s(x,w):
+    s=10.0
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return s*tr.exp(-0.5*((xx - yy)/w)**2)
 
 def Krbflog(x,s,w,eps=1e-13):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
-    return s*s*tr.exp(-0.5*((tr.log(xx+eps) - tr.log(yy+eps))/w)**2)
+    return s*tr.exp(-0.5*((tr.log(xx+eps) - tr.log(yy+eps))/w)**2)
 
-def Krbflog_no_s(x,w,eps=1e-13):
-    s=2.5**0.5
+def Krbflogxa(x,s,w,a,eps=1e-13):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
-    return s*s*tr.exp(-0.5*((tr.log(xx+eps) - tr.log(yy+eps))/w)**2)
+    return s*xx**a*tr.exp(-0.5*((tr.log(xx+eps) - tr.log(yy+eps))/w)**2)*yy**a
+
+def Krbflogxab(x,s,w,a,b,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return s*xx**a*(1-xx)**b*tr.exp(-0.5*((tr.log(xx+eps) - tr.log(yy+eps))/w)**2)*yy**a*(1-yy)**b
+
+def Krbflog_no_s(x,w,s=5.0,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return s*tr.exp(-0.5*((tr.log(xx+eps) - tr.log(yy+eps))/w)**2)
 
 def Krbf_no_s(x,w):
+    s=2.0
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
-    return tr.exp(-0.5*((xx - yy)/w)**2)
+    return s*s*tr.exp(-0.5*((xx - yy)/w)**2)
 
 
 def Krbf_fast(x,s,w):
@@ -576,10 +909,19 @@ def Kpoly(x,s,t,a,b):
     yy=x.view(x.shape[0],1)
     return s**2*((xx*yy)**a*((1-xx)*(1-yy))**b)/((1-t*xx)*(1-t*yy))
 
-def Kpoly2(x,s,a,b):
+def Kpoly1(x,s,a,b):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
-    return s**2*((xx*yy)**a*((1-xx)*(1-yy))**b)/((1-yy*xx))
+    return s*((xx*yy)**a*((1-xx)*(1-yy))**b)/((1-yy*xx))
+
+def log_poly1(x,s1,w1,s,a,b,scale=1.0,sp=0.1,eps=1e-13):
+    K2= Krbflog(x,s1,w1,eps) #log # linear
+    K1 = Kpoly1(x,s,a,b) #log
+    xx=x.view(1,x.shape[0])
+    ss=Sig(xx,scale,sp)
+    s=transform(ss)
+    sC= 1-s
+    return s*K1*s.T + sC*K2*sC.T
 
 def log_jac(x,s,t,a,b,s1,w1,scale,sp=0.1,eps=1e-12):
     #s1,w1,s2,w2,scale,sp =  1.0,0.1,1.0,2.2,1.0,.1
@@ -615,7 +957,7 @@ class splitRBFker():
         return sigC@K2@sigC + sig@K1@sig
 
 def Sig(x,scale,sp=0.1):
-    return tr.special.expit(scale*(x-sp))
+    return tr.special.expit(scale*scale*(x-sp))
 def transform(s):
     return s.view(s.shape[1],1).repeat(1,s.shape[1])
 
@@ -632,7 +974,19 @@ def rbf_logrbf(x,s1,w1,s2,w2,scale,sp=0.1,eps=1e-12):
     sC = 1-s
     return  s*K1*s.T +sC*K2*sC.T
 
-def rbf_logrbf_s1(x,s1,w1,s2,w2,scale=1.0,sp=0.1,eps=1e-12):
+def rbf_logrbf_l(x,w1,w2,s1=1.0,s2=50.0,scale=1.0,sp=0.1,eps=1e-12):
+    #plot this values and it looks like a simple rbf kernel
+    #s1,w1,s2,w2,scale,sp =  1.0,0.1,1.0,2.2,1.0,.1
+    K1 = KrbfMat(x,s1,w1) # linear
+    K2 = KrbfMat(tr.log(x+eps),s2,w2) #log
+    xx=x.view(1,x.shape[0])
+    ss=Sig(xx,scale,sp)
+    s=transform(ss)
+    #sig=sig.view(1,sig.shape[1]).repeat(sig.shape[1],1)
+    sC = 1-s
+    return  s*K1*s.T +sC*K2*sC.T
+
+def rbf_logrbf_s1(x,s1,w1,s2,w2,scale=1.0,sp=0.1,eps=1e-13):
     #plot this values and it looks like a simple rbf kernel
     #s1,w1,s2,w2,scale,sp =  1.0,0.1,1.0,2.2,1.0,.1
     K1 = KrbfMat(x,s1,w1) # linear
@@ -670,7 +1024,19 @@ def rbf_deb(x,s1,w1,s2,w2,scale,sp=0.1,eps=1e-12):
     sC = 1-s
     return  s*K1*s.T +sC*K2*sC.T
 
-def rbf_deb_s1(x,s1,w1,s2,w2,scale=0.1,sp=0.1,eps=1e-13):
+def rbf_debxa(x,s1,w1,s2,w2,a,scale,sp=0.1,eps=1e-11):
+    #plot this values and it looks like a simple rbf kernel
+    #s1,w1,s2,w2,scale,sp =  1.0,0.1,1.0,2.2,1.0,.1
+    K1 = KrbfMat(x,s1,w1) # linear
+    K2 = Kdebbioxa(x,s2,w2,a,eps) #log
+    xx=x.view(1,x.shape[0])
+    ss=Sig(xx,scale,sp)
+    s=transform(ss)
+    #sig=sig.view(1,sig.shape[1]).repeat(sig.shape[1],1)
+    sC = 1-s
+    return  s*K1*s.T +sC*K2*sC.T
+
+def rbf_deb_s1(x,s1,w1,s2,w2,scale=1.0,sp=0.1,eps=1e-13):
     #plot this values and it looks like a simple rbf kernel
     #s1,w1,s2,w2,scale,sp =  1.0,0.1,1.0,2.2,1.0,.1
     K1 = KrbfMat(x,s1,w1) # linear
@@ -722,12 +1088,17 @@ def l(x,l0,eps=1e-10):
 def Kdebbio(x,l0,sig,eps=1e-13):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
-    return sig**2*tr.sqrt(2*l(xx,l0,eps)*l(yy,l0,eps)/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*tr.exp(-(xx-yy)**2/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))
+    return sig*tr.sqrt(2*l(xx,l0,eps)*l(yy,l0,eps)/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*tr.exp(-(xx-yy)**2/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))
 
-def Kdebbioxa(x,l0,sig,a,eps=1e-13):
+def Kdebbioxa(x,sig,l0,a,eps=1e-13):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
-    return xx**a*sig**2*tr.sqrt(2*l(xx,l0,eps)*l(yy,l0,eps)/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*tr.exp(-(xx-yy)**2/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*yy**a
+    return xx**a*sig*tr.sqrt(2*l(xx,l0,eps)*l(yy,l0,eps)/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*tr.exp(-(xx-yy)**2/(2*l(xx,l0,eps)**2+2*l(yy,l0,eps)**2))*yy**a
+
+def Kdebbioxa_no_s(x,l0,a,sig,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return xx**a*sig*tr.sqrt(2*l(xx,l0,eps)*l(yy,l0,eps)/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*tr.exp(-(xx-yy)**2/(2*l(xx,l0,eps)**2+2*l(yy,l0,eps)**2))*yy**a
 
 def Kdebbioxb(x,l0,sig,b,eps=1e-13):
     xx=x.view(1,x.shape[0])
@@ -737,7 +1108,7 @@ def Kdebbioxb(x,l0,sig,b,eps=1e-13):
 def KSM(x,s1,l1,m1,s2,l2,m2):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
-    return s1*s1*tr.exp(-0.5*((xx - yy)**2/l1**2))*tr.cos(m1*(xx-yy)**2)+s2*s2*tr.exp(-0.5*((xx - yy)**2/l2**2))*tr.cos(m2*(xx-yy)**2)
+    return s1*tr.exp(-0.5*((xx - yy)**2/l1**2))*tr.cos(m1*(xx-yy)**2)+s2*tr.exp(-0.5*((xx - yy)**2/l2**2))*tr.cos(m2*(xx-yy)**2)
 
 def R(z,t):
     return tr.sqrt(1-2*z*t+t*t)
@@ -839,7 +1210,8 @@ def Kcom_ds(x,s1,w1,s2,w2,scale,sp=0.1,eps=1e-12):
 def R(z,t):
     return 1.0/tr.sqrt(1-2*z*t+t*t)
 
-def jacobi(x,s,t,a,b):
+def jacobi_t(x,s,a,b):
+   t=tr.tensor(0.5)
    x=x.view(x.shape[0],1)
    y=x.view(1,x.shape[0])
    return (s**2)*(x*y)**a*((1-x)*(1-y))**b*(R(2*x-1,t)*R(2*y-1,t)*((1-t+R(2*x-1,t))*(1-t+R(2*y-1,t)))**a*((1+t+R(2*x-1,t))*(1+t+R(2*y-1,t)))**b)**(-1)
@@ -862,13 +1234,13 @@ def preparedata(i,nu,rMj,rMe,rM,x_grid,ITD="Re"):
     CovD= np.cov(rMj[:,:,i].T*np.sqrt(Nj-1))#same factor used to plot the data
     CovD=(CovD+CovD.T)/2.0
 
-    CovD=np.abs(CovD)
+    #CovD=np.abs(CovD)
     #CovD[CovD<0]=0
 
     M = rM.T[i]
     eM = rMe.T[i]
     n = nu.T[i]
-    
+    regu= 1e-8*np.identity(n.shape[0])
     fe = FE2_Integrator(x_grid)
     # soften the constrants
  
@@ -880,13 +1252,13 @@ def preparedata(i,nu,rMj,rMe,rM,x_grid,ITD="Re"):
     for k in np.arange(n.shape[0]):
         if ITD=="Re":
             B[k,:] = fe.set_up_integration(Kernel= lambda x : np.cos(n[k]*x))
-            lam = 1e-10  #normalization
-            lam_c = 1e-10 #x=1 
+            lam = 1e-5  #normalization
+            lam_c = 1e-6 #x=1 
 
         elif ITD=="Im":
             B[k,:] = fe.set_up_integration(Kernel= lambda x : np.sin(n[k]*x))
             #lam = 1e5  #normalization
-            lam_c = 1e-10 #x=1 
+            lam_c = 1e-6 #x=1 
             
 
     if ITD=="Re":
@@ -894,17 +1266,17 @@ def preparedata(i,nu,rMj,rMe,rM,x_grid,ITD="Re"):
         Gamma = np.zeros((V.shape[0],V.shape[0]))
         Gamma[0,0] = lam
         Gamma[1,1] = lam_c
-        if i<-1:
-            Gamma[2:,2:] = np.diag(eM)
+        if i<-12:
+            Gamma[2:,2:] = np.diag(np.diag(CovD))
         else:
-            Gamma[2:,2:] = CovD#np.diag(eM)#CovD
+            Gamma[2:,2:] = CovD + 0.01*np.diag(np.diag(CovD))#np.diag(eM)#CovD
         Y = np.concatenate(([1.0,0.0],M))
     elif ITD=="Im":
         V = np.concatenate((B1[np.newaxis,:],B))
         Gamma = np.zeros((V.shape[0],V.shape[0]))
         #Gamma[0,0] = lam
         Gamma[0,0] = lam_c
-        Gamma[1:,1:] = CovD#np.diag(eM)#CovD
+        Gamma[1:,1:] = CovD +0.01*np.diag(np.diag(CovD))#np.diag(eM)#CovD
         Y = np.concatenate(([0.0],M))
 
     return x_grid,V,Y,Gamma
@@ -1024,24 +1396,25 @@ def NNPDFdata(datanu,x_grid,regulator,lamb,ITD="Re"):
     else:
         Reg=0
 
-
     M=datanu.T[2:].mean(axis=0)
     eMnu=datanu.T[2:].std(axis=0)#*np.sqrt(datanu.shape[0])
     CovD=np.cov(datanu.T[2:].T)#*np.sqrt(datanu.shape[0]-1))
     #Symetrize the matrix CovD
     #print("Symetrize the matrix CovD")
     CovD=(CovD+CovD.T)/2.0
-
-    #CovD=covfilter(CovD,1)
-    #CovD=truncatecov(CovD)
-    regu=0.0#1e-3
+    #truncate covariance matrix
+    if numax==25:
+        #print("Flag1")
+        CovD=truncatecov(CovD)
+        regu= 1e-9*np.identity(nu_d_grid.shape[0])
+    else:
+        regu= 1e-4*np.diag(np.diag(CovD))
     #CovD=np.abs(CovD)
-    
 
     fe = FE2_Integrator(x_grid)
     B0 = fe.set_up_integration(Kernel=lambda z: 1)
     B1 = np.zeros_like(B0) 
-    B1[-1] = 1.0 # x=1 is at the end... #Delta function
+    B1[-1] = x_grid[-1]#1.0 # x=1 is at the end... #Delta function
     # is the nu values at current z
     B = np.zeros((nu_d_grid.shape[0],Nx))
     for k in np.arange(nu_d_grid.shape[0]):
@@ -1063,16 +1436,16 @@ def NNPDFdata(datanu,x_grid,regulator,lamb,ITD="Re"):
             #print("Flag1")
             Gamma[2:,2:] = np.diag(np.diag(CovD))
         else:
-            Gamma[2:,2:] = CovD + regu*np.diag(np.diag(CovD))#np.diag(eM**2)
+            Gamma[2:,2:] = CovD + regu#np.diag(eM**2)
         Y = np.concatenate(([1.0,0.0],M))
     elif ITD=="Im":
         V = np.concatenate((B1[np.newaxis,:],B))
         Gamma = np.zeros((V.shape[0],V.shape[0]))
         Gamma[0,0] = lam_c
-        if numax>26:
+        if numax>30:
             Gamma[1:,1:] = np.diag(np.diag(CovD))
         else:
-            Gamma[1:,1:] = CovD + regu*np.diag(np.diag(CovD))#np.diag(eM**2)
+            Gamma[1:,1:] = CovD + regu#np.diag(eM**2)
         Y = np.concatenate(([0.0],M))
 
     return x_grid,V,Y,Gamma
@@ -1104,10 +1477,7 @@ def preparemockdata(Nnupoints,numax,ITD="Re",Nx=256):
     #print(jM.shape)
     M = np.mean(jM,axis=0)
     eM = np.std(jM,axis=0)
-    """print("Check the zero point:",nu[0],M[0],eM[0])
-    plt.errorbar(numock,M,eM,marker='o')
-    plt.show()"""
-    #chop off the nu = 0
+
     jM = jM[:,1:]
     n = numock[1:]
     M = np.mean(jM,axis=0)
@@ -1124,13 +1494,6 @@ def preparemockdata(Nnupoints,numax,ITD="Re",Nx=256):
     #change nans by 0
     #CovD=np.abs(CovD)
     CovD[np.isnan(CovD)]=0
-
-    """U,S,V = np.linalg.svd(CovD)
-    #print("Data Cov: ",CovD)
-    print("Data Cov S:",S)
-    #plot covD
-    plt.imshow(CovD)
-    plt.show()"""
 
     x_grid = np.concatenate((np.logspace(-12,-1,np.int32(Nx/2)),np.linspace(0.1+1e-4,1-1e-12,np.int32(Nx/2))))
     fe = FE2_Integrator(x_grid)
@@ -1166,38 +1529,85 @@ def preparemockdata(Nnupoints,numax,ITD="Re",Nx=256):
     return x_grid,V,Y,Gamma
 
 
-def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx):
+def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx,ITD):
     if modelname==PDF_N.__name__:
         meanf=tr.tensor([-1.0,0.0,0.0])
-        sigmaf=tr.tensor([2.0,6.0,4.0])
+        sigmaf=tr.tensor([2.0,15.0,15.0])
         configf=tr.tensor([2,2,2])
-        mod=(-0.0,1.0,1.0)
+        mod=(-0.25,3.0,1.0)
+        #if ITD=="Re":
+        #    mod=(-0.25,3.0,1.0)
+        #elif ITD=="Im":
+        #    mod=(-0.25,3.0,0.5)
         labf=['α', 'β', 'N']
         modfunc=PDF_N
 
-    elif modelname==ModelC.__name__:#Constant model
+    elif modelname==g_flat.__name__:#Constant model
         meanf=tr.tensor([0.0])
-        sigmaf=tr.tensor([20.0])
-        configf=tr.tensor([2])
+        sigmaf=tr.tensor([15.0])
+        configf=tr.tensor([2.0])
         mod=(1.0,)
         #if mode=="kernel":
         #    mod=(0.0,)
-        labf=['N']
-        modfunc=ModelC
+        labf=['N']#=sigma
+        modfunc=g_flat
 
-    elif modelname==PDFnormed.__name__:
+    elif modelname==noModel.__name__:
+        meanf=tr.tensor([0.0])
+        sigmaf=tr.tensor([15.0])
+        configf=tr.tensor([2])
+        mod=(0.0,)
+        labf=['N']
+        modfunc=noModel
+    elif modelname==PDF_con.__name__:
+        meanf=tr.tensor([0.0])
+        sigmaf=tr.tensor([15.0])
+        configf=tr.tensor([2.0])
+        mod=(3.0,)
+        labf=['β']
+        modfunc=PDF_con
+    
+    elif modelname==PDF_div.__name__:
+        meanf=tr.tensor([0.0])
+        sigmaf=tr.tensor([15.0])
+        configf=tr.tensor([2])
+        mod=(3.0,)
+        labf=['β']
+        modfunc=PDF_div
+
+    elif modelname=="PDFc":
         meanf=tr.tensor([-1.0,0.0])
-        sigmaf=tr.tensor([2.0,6.0])
+        sigmaf=tr.tensor([1.0,15.0])
         configf=tr.tensor([2,2])
-        mod=(-0.0,1.0)
+        mod=(0.25,3.0)
         labf=['α', 'β']
-        modfunc=PDFnormed
+        modfunc=PDFn
+    
+    elif modelname=="PDFd":
+        meanf=tr.tensor([0.0,0.0])
+        sigmaf=tr.tensor([1.0,15.0])
+        configf=tr.tensor([2,2])
+        mod=(-0.5,3.0)
+        labf=['α', 'β']
+        modfunc=PDFn
+
+    elif modelname==PDFn.__name__:
+        meanf=tr.tensor([-1.0,0.0])
+        sigmaf=tr.tensor([2.0,15.0])
+        configf=tr.tensor([2,2])
+        mod=(-0.1,1.0)
+        labf=['α', 'β']
+        modfunc=PDFn
+
 
     elif modelname==PDF.__name__:
         meanf=tr.tensor([-1.0,0.0,0.0])
         sigmaf=tr.tensor([2., 15., 15.])#2.0,7.0,20.0])
         configf=tr.tensor([2,2,2])
-        mod=(0.0,1.0,2.0)
+        if ITD=="Re":
+            mod=(-0.25,3.0,2.0)
+        elif ITD=="Im":
+            mod=(-0.1,3.0,2.0)
         #if mode=="kernel":
         #    mod=(0.0,0.0,0.0)
         labf=['α', 'β', 'N']
@@ -1206,21 +1616,66 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx):
     #select the kernel
     if kernelname==rbf_logrbf.__name__:
         meank=tr.tensor([0.0,0.0,0.0,0.0,0.0])
-        sigmak=tr.tensor([20., 10., 20., 10.,  2.]) #ModelC
+        sigmak=tr.tensor([5., 1., 5., 1.,  2.]) #ModelC
         #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
-        configk=tr.tensor([2,2,2,2,2,2])
+        configk=tr.tensor([2,2,2,2,2])
         #ker=(50.0,1.1,50.0,1.0,1.0)
-        ker=(1.0,1.0,2.5,1.0,1.0)
+        ker=(1.0,np.log(3.5),50.0,np.log(2.0),1.0)
         labk=['σ1','l1','σ2','l2','s']
         kerfunc=rbf_logrbf
 
+    elif re.match( r'^Krbflog_no_sn=(-?\d+\.\d+)$',kernelname):
+        res=re.match( r'^Krbflog_no_sn=(-?\d+\.\d+)$',kernelname)
+        s1 = float(res.group(1))
+        meank=tr.tensor([0.0])
+        sigmak=tr.tensor([1.0])
+        configk=tr.tensor([2])
+        ker=(np.log(2),)
+        labk=['l']
+        kerfunc=lambda x, w: Krbflog_no_s(x, w, s=s1, eps=1e-13)
+
+    if kernelname==rbf_logrbf_l.__name__:
+        meank=tr.tensor([0.0,0.0])
+        sigmak=tr.tensor([ 1.5, 1.0]) #ModelC
+        #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
+        configk=tr.tensor([2,2])
+        #ker=(50.0,1.1,50.0,1.0,1.0)
+        ker=(np.log(2.5),np.log(2.0))
+        labk=['l1','l2']#low x, high x
+        kerfunc=rbf_logrbf_l
+
+    if re.match( r'^rbf_logrbf_ln=(-?\d+\.\d+)$',kernelname):
+        res=re.match( r'^rbf_logrbf_ln=(-?\d+\.\d+)$',kernelname)
+        ss2 = float(res.group(1))
+        meank=tr.tensor([0.0,0.0])
+        sigmak=tr.tensor([ 1.5, 1.0]) #ModelC
+        #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
+        configk=tr.tensor([2,2])
+        #ker=(50.0,1.1,50.0,1.0,1.0)
+        ker=(np.log(2.5),np.log(2.0))
+        labk=['l1','l2']#low x, high x
+        kerfunc=lambda x, w1,w2: rbf_logrbf_l(x, w1,w2, s1=2.0,s2=ss2, eps=1e-13)
+        #kerfunc=rbf_logrbf_l
+
     elif kernelname==rbf_deb.__name__: 
         meank=tr.tensor([0.0,0.0,0.0,0.0,0.0])
-        sigmak=tr.tensor([11.0,6.0,11.0,11.0,2.0])
+        sigmak=tr.tensor([15.0,15.0,15.0,15.0,2.0])
         configk=tr.tensor([2,2,2,2,2,2])
-        ker=(2.0,1.0,2.5,1.0,1.0)
+        ker=(2.5,0.5,2.5,0.5,1.0)
         labk=['σ1','l1','σ2','l2','s']
         kerfunc=rbf_deb
+
+
+    elif kernelname==rbf_debxa.__name__:
+        meank=tr.tensor([0.0,0.0,0.0,0.0,-1.0,0.0])
+        sigmak=tr.tensor([5.0,1.0,5.0,1.0,1.0,2.0])
+        configk=tr.tensor([2,2,2,2,2,2])
+        if ITD=="Re":
+            ker=(1.0,np.log(3.5),10.0,np.log(2.0),-0.25,1.0)
+        elif ITD=="Im":
+            ker=(1.0,np.log(3.5),10.0,np.log(2.0),-0.25,1.0)
+        labk=['σ1','l1','σ2','l2','α','s']
+        kerfunc=rbf_debxa
 
     if kernelname==rbf_logrbf_s1.__name__:
         meank=tr.tensor([0.0,0.0,0.0,0.0])
@@ -1244,7 +1699,7 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx):
         sigmak=tr.tensor([20.0,20.0,20.0,20.0])
         configk=tr.tensor([2,2,2,2])
         #ker=(50.0,1.1,50.0,1.0,1.0)
-        ker=(5.0,5.0,10.0,10.0)
+        ker=(2.5,0.5,2.5,0.5)
         labk=['σ1','l1','σ2','l2']
         kerfunc=rbf_deb_s1
 
@@ -1276,15 +1731,55 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx):
 
     elif kernelname==KrbfMat.__name__: 
         meank=tr.tensor([0.0,0.0])
-        sigmak=tr.tensor([11.0,5.0])
+        sigmak=tr.tensor([5.0,1.0])
         configk=tr.tensor([2,2])
-        ker=(2.5,0.5)
+        ker=(2.5,0.3)
         labk=['σ','l']
         kerfunc=KrbfMat
 
+    elif kernelname==KrbfMatxa.__name__: 
+        meank=tr.tensor([0.0,0.0,-1.0])
+        sigmak=tr.tensor([5.0,1.0,1.0])
+        configk=tr.tensor([2,2,2])
+        ker=(1.5,0.4,-0.2)
+        labk=['σ','l','α']
+        kerfunc=KrbfMatxa
+    
+    elif kernelname==KrbfMatxab.__name__:
+        meank=tr.tensor([0.0,0.0,-1.0,0.0])
+        sigmak=tr.tensor([5.0,1.0,1.0,10.0])
+        configk=tr.tensor([2,2,2,2])
+        ker=(1.5,0.4,-0.2,1.0)
+        labk=['σ','l','α','β']
+        kerfunc=KrbfMatxab
+    
+    elif kernelname=="KrbfMat1": 
+        meank=tr.tensor([0.0,0.0])
+        sigmak=tr.tensor([5.0,1.0])
+        configk=tr.tensor([2,2])
+        ker=(2.5,0.3)
+        labk=['σ','l']
+        kerfunc=KrbfMat
+
+    elif kernelname==rbf_s.__name__:
+        meank=tr.tensor([0.0])
+        sigmak=tr.tensor([15.0])
+        configk=tr.tensor([2])
+        ker=(0.5,)
+        labk=['l',]
+        kerfunc=rbf_s
+
     elif kernelname==Krbflog.__name__:
         meank=tr.tensor([0.0,0.0])
-        sigmak=tr.tensor([10.0,10.0])
+        sigmak=tr.tensor([5.0,1.0])
+        configk=tr.tensor([2,2])
+        ker=(4.0,np.log(2.0))
+        labk=['σ','l']
+        kerfunc=Krbflog
+
+    elif kernelname=="Krbflog1":
+        meank=tr.tensor([0.0,0.0])
+        sigmak=tr.tensor([5.0,1.0])
         configk=tr.tensor([2,2])
         ker=(2.0,0.5)
         labk=['σ','l']
@@ -1292,17 +1787,18 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx):
 
     elif kernelname==Krbflog_no_s.__name__:
         meank=tr.tensor([0.0])
-        sigmak=tr.tensor([10.0])
+        sigmak=tr.tensor([1.0])
         configk=tr.tensor([2])
-        ker=(1.1,)
+        ker=(np.log(2),)
         labk=['l']
         kerfunc=Krbflog_no_s
+
         
     elif kernelname==Krbf_no_s.__name__:
-        meank=tr.tensor([0.0,0.0])
-        sigmak=tr.tensor([10.0,10.0])
-        configk=tr.tensor([2,2])
-        ker=(0.1,0.1)
+        meank=tr.tensor([0.0])
+        sigmak=tr.tensor([1.0])
+        configk=tr.tensor([2])
+        ker=(0.1,)
         labk=['l']
         kerfunc=Krbf_no_s
 
@@ -1316,23 +1812,49 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx):
 
     elif kernelname==Kdebbio.__name__:
         meank=tr.tensor([0.0,0.0])
-        sigmak=tr.tensor([10.0,10.0])
+        sigmak=tr.tensor([15.0,15.0])
         configk=tr.tensor([2,2])
-        ker=(5.0,9.1)
+        ker=(2.0,0.5)
         labk=['σ','l']
         kerfunc=Kdebbio
 
+    elif re.match( r'^Kdebbioxa_no_sn=(-?\d+\.\d+)$',kernelname):
+        res=re.match( r'^Kdebbioxa_no_sn=(-?\d+\.\d+)$',kernelname)
+        s1 = float(res.group(1))
+        meank=tr.tensor([0.0,-1.0])
+        sigmak=tr.tensor([1.0,1.0])
+        configk=tr.tensor([2,2])
+        ker=(np.log(2.0),-0.25)
+        labk=['l','α']
+        kerfunc=lambda x, w,a: Kdebbioxa_no_s(x, w, a,sig=s1, eps=1e-13)
+
     elif kernelname==Kdebbioxa.__name__:
         meank=tr.tensor([0.0,0.0,-1.0])
-        sigmak=tr.tensor([10.0,10.0,1.0])
+        sigmak=tr.tensor([5.0,1.0,1.0])
         configk=tr.tensor([2,2,2])
-        ker=(2.0,0.5,-0.2)
+        ker=(4.0,np.log(2.0),-0.25)
         labk=['σ','l','α']
         kerfunc=Kdebbioxa
 
+    elif kernelname==Krbflogxa.__name__:
+        meank=tr.tensor([0.0,0.0,-1.0])
+        sigmak=tr.tensor([5.0,1.0,1.0])
+        configk=tr.tensor([2,2,2])
+        ker=(2.0,0.5,-0.2)
+        labk=['σ','l','α']
+        kerfunc=Krbflogxa
+
+    elif kernelname==Krbflogxab.__name__:
+        meank=tr.tensor([0.0,0.0,-1.0,0.0])
+        sigmak=tr.tensor([5.0,1.0,1.0,10.0])
+        configk=tr.tensor([2,2,2,2])
+        ker=(2.0,0.5,-0.2,1.0)
+        labk=['σ','l','α','β']
+        kerfunc=Krbflogxab
+
     elif kernelname==Kdebbioxb.__name__:
         meank=tr.tensor([0.0,0.0,0.0])
-        sigmak=tr.tensor([11.0,10.0,5.0])
+        sigmak=tr.tensor([5.0,1.0,10.0])
         configk=tr.tensor([2,2,2])
         ker=(3.0,2.1,3.0)
         labk=['σ','l','β']
@@ -1340,40 +1862,58 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx):
 
     elif kernelname==KSM.__name__:
         meank=tr.tensor([0.0,0.0,0.0,0.0,0.0,0.0])
-        sigmak=tr.tensor([10.0,5.0,10.0,10.0,5.0,10.0])
+        sigmak=tr.tensor([5.0,1.0,3.0,5.0,1.0,3.0])
         configk=tr.tensor([2,2,2,2,2,2])
-        ker=(10.0,0.5,4.0,10.0,1.5,3.0)
+        ker=(1.0,0.5,1.5,1.0,0.5,1.5)
         labk=['σ1','l1','τ1','σ2','l2','τ2']
         kerfunc=KSM
+    
     elif kernelname==Kpoly.__name__:
-        meank=tr.tensor([0.0,0.0,0.0,0.0])
-        sigmak=tr.tensor([11.0,1.0,10.0,10.0])
+        meank=tr.tensor([0.0,-1.0,0.0,0.0])
+        sigmak=tr.tensor([10.0,2.0,10.0,10.0])
         configk=tr.tensor([2,2,2,2])
-        ker=(10.0,0.5,1.0,5.0)
-        labk=['σ','l','a','b']
+        ker=(1.5,0.5,1.0,1.0)
+        labk=['σ','t','a','b']
         kerfunc=Kpoly
-    elif kernelname==Kpoly2.__name__:
-        meank=tr.tensor([0.0,0.0,0.0,0.0])
-        sigmak=tr.tensor([10.0,10.0,10.0])
+    
+    elif kernelname==Kpoly1.__name__:
+        meank=tr.tensor([0.0,-1.0,0.0])
+        sigmak=tr.tensor([15.0,2.0,15.0])
         configk=tr.tensor([2,2,2])
-        ker=(9.0,1.0,5.0)
-        labk=['σ','l','a']
-        kerfunc=Kpoly
+        ker=(4.0,-0.1,3.0)
+        labk=['σ','a','b']
+        kerfunc=Kpoly1
+
+    elif kernelname==log_poly1.__name__:
+        meank=tr.tensor([0.0,0.0,0.0,0.0,0.0])
+        sigmak=tr.tensor([5.0,1.0,15.0,15.0,15.0])
+        configk=tr.tensor([2,2,2,2,2])
+        ker=(1.5,0.5,1.5,1.0,1.0)
+        labk=['σ1','l1','σ','a','b']
+        kerfunc=log_poly1
 
     elif kernelname==log_jac.__name__:
         meank=tr.tensor([0.0,0.0,0.0,0.0,0.0,0.0,0.0])
-        sigmak=tr.tensor([11.0,1.0,10.0,10.0,10.0,10.0,2.0])
+        sigmak=tr.tensor([5.0,1.0,10.0,10.0,5.0,1.0,2.0])
         configk=tr.tensor([2,2,2,2,2,2,2])
-        ker=(10.0,0.5,2.0,1.0,9.0,1.0,1.0)
+        ker=(2.5,0.5,2.0,1.0,9.0,1.0,1.0)
         labk=['σ1','l1','σ2','l2','a','b','s']
         kerfunc=log_jac
     elif kernelname==jacobi.__name__:
-        meank=tr.tensor([0.0,0.0,0.0,0.0])
-        sigmak=tr.tensor([20.0,1.0,20.0,20.0])
+        meank=tr.tensor([0.0,-1.0,0.0,0.0])
+        sigmak=tr.tensor([15.0,2.0,15.0,15.0])
         configk=tr.tensor([2,2,2,2])
-        ker=(2.5,0.5,1.0,2.0)
+        ker=(2.5,0.1,1.0,1.0)
         labk=['σ','t','a','b']
         kerfunc=jacobi
+
+    elif kernelname==jacobi_t.__name__:
+        meank=tr.tensor([0.0,0.0,0.0])
+        sigmak=tr.tensor([15.0,15.0,15.0])
+        configk=tr.tensor([2,2,2])
+        ker=(2.5,1.0,1.0)
+        labk=['σ','a','b']
+        kerfunc=jacobi_t
 
     if nugget=="yes":
         meank=tr.cat((meank,tr.tensor([0.0])))
@@ -1407,16 +1947,16 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx):
 #Following grids specified in the draft
 def generategrid(Nx,grid):
     if grid=="lin":
-        x_grid = np.linspace(0.0+1e-6,1-1e-6,np.int32(Nx+1))#
+        x_grid = np.linspace(0.0+1e-6,1-1e-6,np.int32(Nx+1))
     elif grid=="log_lin":
         x_grid=np.concatenate((np.linspace(5e-9,1,1) ,np.logspace(-8,-1,np.int32(Nx/2)), np.linspace( 0.1+1e-4 ,1-1e-8,np.int32(Nx/2))))
     return x_grid
 
 
 #select the model and kernel
-def Modeldef(ITD,modelname,kernelname,nugget,device,mode,ID,test,grid,Nx):
+def Modeldef(ITD,modelname,kernelname,nugget,device,mode,ID,test,grid,Nx,lambdas):
     fits_comb=[]
-    mean,sigma,config,mod,ker,modfunc,kerfunc,device,mode,ID,x_grid,lab = arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx)
+    mean,sigma,config,mod,ker,modfunc,kerfunc,device,mode,ID,x_grid,lab = arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx,ITD)
     nu,rMj,rMe,rM = get_data(ITD)
     now = datetime.datetime.now()
     print("#################Define the model###########################")
@@ -1424,17 +1964,18 @@ def Modeldef(ITD,modelname,kernelname,nugget,device,mode,ID,test,grid,Nx):
     print("GP specifications \n Sampling or training: "+mode+"\n model: "+modelname+"\n kernel: "+kernelname+" nugget: "+ nugget+"\n Ioffe time Distribution: "+ITD+"(M)",
           "\n mean =",mean,"\n sigma =",sigma,"\n prior dist =",config,"\n model init =",mod,"\n kernel init =",ker,"\n device =",device,"\n mode =",mode,"\n ID =",ID)
     #print("0=gaussian, 1=lognormal, 2=expbeta")
-    for i in range(0,12):
-        x_gri0,V0,Y0,Gamma0 = preparedata(i,nu,rMj,rMe,rM,x_grid,ITD=ITD)
-        myGP0= GaussianProcess(x_gri0,V0,Y0,Gamma0,f"z={i+1}a",nugget=nugget,device=device,ITD=ITD,labels=lab,Pd=modfunc, Ker=kerfunc,Pd_args=mod,Ker_args=ker)
-        myGP0.prior2ndlevel(mode,0.99,mean=mean,sigma=sigma,prior_mode=config)
-        fits_comb.append(myGP0)
-        #print(fits_comb[i].name, "done")
+    if not (test in ["mock","NNPDF"]):
+        for i in range(0,12):
+            x_gri0,V0,Y0,Gamma0 = preparedata(i,nu,rMj,rMe,rM,x_grid,ITD=ITD)
+            myGP0= GaussianProcess(x_gri0,V0,Y0,Gamma0,f"z={i+1}a",device=device,ITD=ITD,kernelname=kernelname,modelname=modelname,labels=lab,gridname=grid,nugget=nugget,Pd=modfunc, Ker=kerfunc,Pd_args=mod,Ker_args=ker)
+            myGP0.prior2ndlevel(mode,0.99,mean=mean,sigma=sigma,prior_mode=config)
+            fits_comb.append(myGP0)
+            #print(fits_comb[i].name, "done")
     if ITD=="Re" and test=="mock":
         numax=[4,10,25]
         for j in range(0,3):
             x_gri0,V0,Y0,Gamma0 = preparemockdata1(numax[j]+1,numax[j],x_grid,ITD)
-            myGP0= GaussianProcess(x_gri0,V0,Y0,Gamma0,f"z=mock({numax[j]})",nugget=nugget,device=device,ITD=ITD,labels=lab,Pd=modfunc, Ker=kerfunc,Pd_args=mod,Ker_args=ker)
+            myGP0= GaussianProcess(x_gri0,V0,Y0,Gamma0,f"z=mock({numax[j]})",device=device,ITD=ITD,kernelname=kernelname,modelname=modelname,labels=lab,gridname=grid,nugget=nugget,Pd=modfunc, Ker=kerfunc,Pd_args=mod,Ker_args=ker)
             myGP0.prior2ndlevel(mode,0.99,mean=mean,sigma=sigma,prior_mode=config)
             fits_comb.append(myGP0)
             #print(fits_comb[-1].name, "done")
@@ -1445,8 +1986,10 @@ def Modeldef(ITD,modelname,kernelname,nugget,device,mode,ID,test,grid,Nx):
             MMM='imag'
         for i in [4,10,25]:
             datanu4 = np.loadtxt('NNPDF/NNPDF40_nnlo_as_01180_1000_itd_'+MMM+'_numax'+str(i)+'.dat',dtype=np.float64)
-            x_gri0,V0,Y0,Gamma0 = NNPDFdata(datanu4,x_grid,[1e-9,1e-10,1e-13],[1e-10,1e-10],ITD)
-            myGP0= GaussianProcess(x_gri0,V0,Y0,Gamma0,f"z=NNPDF({i})",nugget=nugget,device=device,ITD=ITD,labels=lab,Pd=modfunc, Ker=kerfunc,Pd_args=mod,Ker_args=ker)
+            x_gri0,V0,Y0,Gamma0 = NNPDFdata(datanu4,x_grid,[1e-11,1e-12,1e-13],lambdas,ITD)
+            #if kernelname=="Krbflog_no_s" and i==25:
+            #    kerfunc=lambda x, w: Krbflog_no_s(x, w, s=3.0, eps=1e-13)
+            myGP0= GaussianProcess(x_gri0,V0,Y0,Gamma0,f"z=NNPDF({i})",device=device,ITD=ITD,kernelname=kernelname,modelname=modelname,labels=lab,gridname=grid,nugget=nugget,Pd=modfunc, Ker=kerfunc,Pd_args=mod,Ker_args=ker)
             myGP0.prior2ndlevel(mode,0.99,mean=mean,sigma=sigma,prior_mode=config)
             fits_comb.append(myGP0)
             print(fits_comb[-1].name, "done")

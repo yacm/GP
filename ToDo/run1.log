@@ -1,0 +1,378 @@
+Job 113651 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=37.0 in mode=all, grid=log_lin
+Job 113652 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=35.0 in mode=all, grid=log_lin
+Job 113653 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=32.0 in mode=all, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=37.0(all+log_lin)/job_script.slurm deleted.
+Job 113654 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=36.0 in mode=all, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=35.0(all+log_lin)/job_script.slurm deleted.
+Job 113655 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=34.0 in mode=all, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=32.0(all+log_lin)/job_script.slurm deleted.
+Job 113656 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=30.0 in mode=all, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=36.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=34.0(all+log_lin)/job_script.slurm deleted.
+Job 113657 submitted successfully.
+Job 113658 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=38.0 in mode=all, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=30.0(all+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=41.0 in mode=all, grid=log_lin
+Job 113659 submitted successfully.
+Job 113660 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=31.0 in mode=all, grid=log_lin
+Job 113661 submitted successfully.
+Job 113667 submitted successfully.
+Job 113662 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=31.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=38.0(all+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=33.0 in mode=all, grid=log_lin
+Job 113663 submitted successfully.
+Job 113664 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=41.0(all+log_lin)/job_script.slurm deleted.
+Job 113665 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=45.0 in mode=all, grid=log_lin
+Job 113666 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=49.0 in mode=all, grid=log_lin
+Job 113668 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=39.0 in mode=all, grid=log_lin
+Job 113669 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=47.0 in mode=all, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=46.0 in mode=all, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=43.0 in mode=all, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=50.0 in mode=all, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=44.0 in mode=all, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=42.0 in mode=all, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=33.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=45.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=46.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=42.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=44.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=49.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=50.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=47.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=43.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=39.0(all+log_lin)/job_script.slurm deleted.
+Job 113670 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=48.0 in mode=all, grid=log_lin
+Job 113671 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=37.0 in mode=kernel, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=48.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=37.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113672 submitted successfully.
+Job 113673 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=34.0 in mode=kernel, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=35.0 in mode=kernel, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=35.0(kernel+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=34.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113674 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=32.0 in mode=kernel, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=32.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113675 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=31.0 in mode=kernel, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=31.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113676 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=44.0 in mode=kernel, grid=log_lin
+Job 113677 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=36.0 in mode=kernel, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=44.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113678 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=45.0 in mode=kernel, grid=log_lin
+Job 113679 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=38.0 in mode=kernel, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=36.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113680 submitted successfully.
+Job 113681 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=45.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113682 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=38.0(kernel+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=30.0 in mode=kernel, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=47.0 in mode=kernel, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=33.0 in mode=kernel, grid=log_lin
+Job 113683 submitted successfully.
+Job 113686 submitted successfully.
+Job 113684 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=30.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113685 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=33.0(kernel+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=47.0(kernel+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=35.0 in mode=mean, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=41.0 in mode=kernel, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=46.0 in mode=kernel, grid=log_lin
+Job 113687 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=42.0 in mode=kernel, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=43.0 in mode=kernel, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=35.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=41.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113688 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=42.0(kernel+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=37.0 in mode=mean, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=46.0(kernel+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=43.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113689 submitted successfully.
+Job 113690 submitted successfully.
+Job 113691 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=40.0 in mode=all, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=49.0 in mode=kernel, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=39.0 in mode=kernel, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=37.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=49.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113692 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=39.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113694 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=40.0(all+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=32.0 in mode=mean, grid=log_lin
+Job 113693 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=31.0 in mode=mean, grid=log_lin
+Job 113695 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=32.0(mean+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=50.0 in mode=kernel, grid=log_lin
+Job 113696 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=48.0 in mode=kernel, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=31.0(mean+log_lin)/job_script.slurm deleted.
+Job 113697 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=34.0 in mode=mean, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=50.0(kernel+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=48.0(kernel+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=44.0 in mode=mean, grid=log_lin
+Job 113698 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=38.0 in mode=mean, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=34.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=44.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=38.0(mean+log_lin)/job_script.slurm deleted.
+Job 113699 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=30.0 in mode=mean, grid=log_lin
+Job 113700 submitted successfully.
+Job 113701 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=47.0 in mode=mean, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=30.0(mean+log_lin)/job_script.slurm deleted.
+Job 113703 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=36.0 in mode=mean, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=47.0(mean+log_lin)/job_script.slurm deleted.
+Job 113702 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=45.0 in mode=mean, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=36.0(mean+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=33.0 in mode=mean, grid=log_lin
+Job 113704 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=45.0(mean+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=41.0 in mode=mean, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=33.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=41.0(mean+log_lin)/job_script.slurm deleted.
+Job 113705 submitted successfully.
+Job 113706 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=46.0 in mode=mean, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=42.0 in mode=mean, grid=log_lin
+Job 113707 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=42.0(mean+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=37.0 in mode=all, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=46.0(mean+log_lin)/job_script.slurm deleted.
+Job 113709 submitted successfully.
+Job 113708 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=37.0(all+log_lin)/job_script.slurm deleted.
+Job 113710 submitted successfully.
+Running g_flat + rbf_logrbf_ln=35.0 in mode=all, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=43.0 in mode=mean, grid=log_lin
+Job 113713 submitted successfully.
+Job 113711 submitted successfully.
+Job 113714 submitted successfully.
+Job 113712 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=35.0(all+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=39.0 in mode=mean, grid=log_lin
+Running g_flat + rbf_logrbf_ln=32.0 in mode=all, grid=log_lin
+Job 113715 submitted successfully.
+Running g_flat + rbf_logrbf_ln=31.0 in mode=all, grid=log_lin
+Running PDF_N + rbf_logrbf_ln=48.0 in mode=mean, grid=log_lin
+Job 113718 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=43.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=32.0(all+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=40.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=31.0(all+log_lin)/job_script.slurm deleted.
+Job 113716 submitted successfully.
+Running g_flat + rbf_logrbf_ln=34.0 in mode=all, grid=log_lin
+Job 113717 submitted successfully.
+Job 113720 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=49.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=34.0(all+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=39.0(mean+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=30.0 in mode=all, grid=log_lin
+Job 113719 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=48.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=40.0(kernel+log_lin)/job_script.slurm deleted.
+Running PDF_N + rbf_logrbf_ln=50.0 in mode=mean, grid=log_lin
+Running g_flat + rbf_logrbf_ln=38.0 in mode=all, grid=log_lin
+SLURM script PDF_N_rbf_logrbf_ln=49.0(mean+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=44.0 in mode=all, grid=log_lin
+Job 113721 submitted successfully.
+Running g_flat + rbf_logrbf_ln=41.0 in mode=all, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=30.0(all+log_lin)/job_script.slurm deleted.
+Job 113722 submitted successfully.
+SLURM script PDF_N_rbf_logrbf_ln=50.0(mean+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=33.0 in mode=all, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=38.0(all+log_lin)/job_script.slurm deleted.
+Job 113724 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=44.0(all+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=33.0(all+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=41.0(all+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=36.0 in mode=all, grid=log_lin
+Job 113723 submitted successfully.
+Job 113725 submitted successfully.
+Running g_flat + rbf_logrbf_ln=45.0 in mode=all, grid=log_lin
+Running g_flat + rbf_logrbf_ln=42.0 in mode=all, grid=log_lin
+Job 113726 submitted successfully.
+Running g_flat + rbf_logrbf_ln=46.0 in mode=all, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=36.0(all+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=42.0(all+log_lin)/job_script.slurm deleted.
+Job 113727 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=45.0(all+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=37.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=46.0(all+log_lin)/job_script.slurm deleted.
+Job 113728 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=37.0(kernel+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=35.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=35.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113729 submitted successfully.
+Running g_flat + rbf_logrbf_ln=32.0 in mode=kernel, grid=log_lin
+Job 113730 submitted successfully.
+Running g_flat + rbf_logrbf_ln=34.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=32.0(kernel+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=34.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113731 submitted successfully.
+Running g_flat + rbf_logrbf_ln=31.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=31.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113732 submitted successfully.
+Job 113733 submitted successfully.
+Running g_flat + rbf_logrbf_ln=43.0 in mode=all, grid=log_lin
+Running g_flat + rbf_logrbf_ln=47.0 in mode=all, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=47.0(all+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=43.0(all+log_lin)/job_script.slurm deleted.
+Job 113734 submitted successfully.
+Running g_flat + rbf_logrbf_ln=48.0 in mode=all, grid=log_lin
+Job 113735 submitted successfully.
+Running g_flat + rbf_logrbf_ln=39.0 in mode=all, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=48.0(all+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=39.0(all+log_lin)/job_script.slurm deleted.
+Job 113736 submitted successfully.
+Running g_flat + rbf_logrbf_ln=44.0 in mode=kernel, grid=log_lin
+Job 113737 submitted successfully.
+Running g_flat + rbf_logrbf_ln=50.0 in mode=all, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=44.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113738 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=50.0(all+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=49.0 in mode=all, grid=log_lin
+Job 113739 submitted successfully.
+Running g_flat + rbf_logrbf_ln=38.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=49.0(all+log_lin)/job_script.slurm deleted.
+Job 113740 submitted successfully.
+Running g_flat + rbf_logrbf_ln=41.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=38.0(kernel+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=41.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113741 submitted successfully.
+Running g_flat + rbf_logrbf_ln=33.0 in mode=kernel, grid=log_lin
+Job 113742 submitted successfully.
+Running PDF_N + rbf_logrbf_ln=40.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=33.0(kernel+log_lin)/job_script.slurm deleted.
+SLURM script PDF_N_rbf_logrbf_ln=40.0(mean+log_lin)/job_script.slurm deleted.
+Job 113743 submitted successfully.
+Running g_flat + rbf_logrbf_ln=37.0 in mode=mean, grid=log_lin
+Job 113744 submitted successfully.
+Running g_flat + rbf_logrbf_ln=42.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=37.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=42.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113745 submitted successfully.
+Running g_flat + rbf_logrbf_ln=45.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=45.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113746 submitted successfully.
+Job 113747 submitted successfully.
+Running g_flat + rbf_logrbf_ln=34.0 in mode=mean, grid=log_lin
+Running g_flat + rbf_logrbf_ln=36.0 in mode=kernel, grid=log_lin
+Job 113748 submitted successfully.
+Running g_flat + rbf_logrbf_ln=32.0 in mode=mean, grid=log_lin
+Job 113749 submitted successfully.
+Running g_flat + rbf_logrbf_ln=35.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=34.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=36.0(kernel+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=32.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=35.0(mean+log_lin)/job_script.slurm deleted.
+Job 113750 submitted successfully.
+Running g_flat + rbf_logrbf_ln=31.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=31.0(mean+log_lin)/job_script.slurm deleted.
+Job 113751 submitted successfully.
+Running g_flat + rbf_logrbf_ln=43.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=43.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113752 submitted successfully.
+Running g_flat + rbf_logrbf_ln=47.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=47.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113753 submitted successfully.
+Running g_flat + rbf_logrbf_ln=48.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=48.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113754 submitted successfully.
+Running g_flat + rbf_logrbf_ln=41.0 in mode=mean, grid=log_lin
+Job 113755 submitted successfully.
+Running g_flat + rbf_logrbf_ln=38.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=41.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=38.0(mean+log_lin)/job_script.slurm deleted.
+Job 113756 submitted successfully.
+Running g_flat + rbf_logrbf_ln=44.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=44.0(mean+log_lin)/job_script.slurm deleted.
+Job 113757 submitted successfully.
+Running g_flat + rbf_logrbf_ln=46.0 in mode=kernel, grid=log_lin
+Job 113758 submitted successfully.
+Running g_flat + rbf_logrbf_ln=39.0 in mode=kernel, grid=log_lin
+Job 113759 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=46.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113760 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=39.0(kernel+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=30.0 in mode=kernel, grid=log_lin
+Job 113761 submitted successfully.
+Running g_flat + rbf_logrbf_ln=33.0 in mode=mean, grid=log_lin
+Job 113762 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=30.0(kernel+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=49.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=33.0(mean+log_lin)/job_script.slurm deleted.
+Job 113763 submitted successfully.
+Running g_flat + rbf_logrbf_ln=40.0 in mode=all, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=49.0(kernel+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=42.0 in mode=mean, grid=log_lin
+Job 113764 submitted successfully.
+Running g_flat + rbf_logrbf_ln=50.0 in mode=kernel, grid=log_lin
+Job 113765 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=40.0(all+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=36.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=42.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=50.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113766 submitted successfully.
+Running g_flat + rbf_logrbf_ln=45.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=36.0(mean+log_lin)/job_script.slurm deleted.
+SLURM script g_flat_rbf_logrbf_ln=45.0(mean+log_lin)/job_script.slurm deleted.
+Job 113767 submitted successfully.
+Running g_flat + rbf_logrbf_ln=47.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=47.0(mean+log_lin)/job_script.slurm deleted.
+Job 113768 submitted successfully.
+Running g_flat + rbf_logrbf_ln=46.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=46.0(mean+log_lin)/job_script.slurm deleted.
+Job 113769 submitted successfully.
+Running g_flat + rbf_logrbf_ln=43.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=43.0(mean+log_lin)/job_script.slurm deleted.
+Job 113770 submitted successfully.
+Running g_flat + rbf_logrbf_ln=49.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=49.0(mean+log_lin)/job_script.slurm deleted.
+Job 113771 submitted successfully.
+Job 113772 submitted successfully.
+Running g_flat + rbf_logrbf_ln=30.0 in mode=mean, grid=log_lin
+Running g_flat + rbf_logrbf_ln=39.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=30.0(mean+log_lin)/job_script.slurm deleted.
+Job 113773 submitted successfully.
+SLURM script g_flat_rbf_logrbf_ln=39.0(mean+log_lin)/job_script.slurm deleted.
+Running g_flat + rbf_logrbf_ln=48.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=48.0(mean+log_lin)/job_script.slurm deleted.
+Job 113774 submitted successfully.
+Running g_flat + rbf_logrbf_ln=40.0 in mode=kernel, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=40.0(kernel+log_lin)/job_script.slurm deleted.
+Job 113775 submitted successfully.
+Running g_flat + rbf_logrbf_ln=50.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=50.0(mean+log_lin)/job_script.slurm deleted.
+Job 113776 submitted successfully.
+Running g_flat + rbf_logrbf_ln=40.0 in mode=mean, grid=log_lin
+SLURM script g_flat_rbf_logrbf_ln=40.0(mean+log_lin)/job_script.slurm deleted.

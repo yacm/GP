@@ -1,0 +1,101 @@
+Running on 11
+/sciclone/home/yacahuanamedra/.conda/envs/gptorch/lib/python3.12/site-packages/torch/functional.py:513: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /opt/conda/conda-bld/pytorch_1724789563135/work/aten/src/ATen/native/TensorShape.cpp:3609.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+/sciclone/home/yacahuanamedra/.conda/envs/gptorch/lib/python3.12/site-packages/torchquad/integration/utils.py:248: UserWarning: DEPRECATION WARNING: In future versions of torchquad, an array-like object will be returned.
+  warnings.warn(
+/sciclone/pscr/yacahuanamedra/GP.py:340: UserWarning: The use of `x.T` on tensors of dimension other than 2 to reverse their shape is deprecated and it will throw an error in a future release. Consider `x.mT` to transpose batches of matrices or `x.permute(*torch.arange(x.ndim - 1, -1, -1))` to reverse the dimensions of a tensor. (Triggered internally at /opt/conda/conda-bld/pytorch_1724789563135/work/aten/src/ATen/native/TensorShape.cpp:3697.)
+  nlp= 0.5*(X@X.T+ 2*tr.logdet(L))
+GP started
+Device: cpu
+Namespace(i=11, Nsamples=3000, burn=300, L=100, eps=0.001, ITD='Im', mean='PDF_con', ker='Krbflog', mode='kernel', IDslurm='11', grid='lin', Nx=256)
+#################Define the model###########################
+Current date and time : 2025-04-22 23:27:27
+GP specifications 
+ Sampling or training: kernel
+ model: PDF_con
+ kernel: Krbflog nugget: no
+ Ioffe time Distribution: Im(M) 
+ mean = tensor([0., 0.]) 
+ sigma = tensor([15., 15.]) 
+ prior dist = tensor([2, 2]) 
+ model init = (3.0,) 
+ kernel init = (2.0, 0.5) 
+ device = cpu 
+ mode = kernel 
+ ID = 11
+z=NNPDF(4) done
+z=NNPDF(10) done
+z=NNPDF(25) done
+#################Define the model###########################
+Current date and time : 2025-04-22 23:27:41
+GP specifications 
+ Sampling or training: kernel
+ model: PDF_con
+ kernel: Krbflog nugget: no
+ Ioffe time Distribution: Im(M) 
+ mean = tensor([0., 0.]) 
+ sigma = tensor([15., 15.]) 
+ prior dist = tensor([2, 2]) 
+ model init = (3.0,) 
+ kernel init = (2.0, 0.5) 
+ device = cpu 
+ mode = kernel 
+ ID = 11
+z=NNPDF(4) done
+z=NNPDF(10) done
+z=NNPDF(25) done
+Training mean only z=12a
+Training kernel only z=NNPDF(25)
+tensor([3.0000, 1.1075, 0.9969, 1.0000])
+Training kernel only z=NNPDF(10)
+tensor([3.0000, 1.0524, 1.1217, 1.0000])
+Training kernel only z=NNPDF(4)
+tensor([3.0000, 0.9360, 1.2533, 1.0000])
+Training kernel only z=12a
+tensor([2.6071, 0.9689, 1.1422, 1.0000])
+Training kernel only z=11a
+tensor([3.0000, 0.9258, 1.3036, 1.0000])
+Training kernel only z=10a
+tensor([3.0000, 0.9089, 1.2994, 1.0000])
+Training kernel only z=9a
+tensor([3.0000, 0.9230, 1.2691, 1.0000])
+Training kernel only z=8a
+tensor([3.0000, 0.9284, 1.2793, 1.0000])
+Training kernel only z=7a
+tensor([3.0000, 0.9280, 1.2980, 1.0000])
+Training kernel only z=6a
+tensor([3.0000, 0.9302, 1.2950, 1.0000])
+Training kernel only z=5a
+tensor([3.0000, 0.9424, 1.2440, 1.0000])
+Training kernel only z=4a
+tensor([3.0000, 0.9348, 1.2275, 1.0000])
+Training kernel only z=3a
+tensor([3.0000, 0.9449, 1.2241, 1.0000])
+Training kernel only z=2a
+tensor([3.0000, 1.0212, 0.9332, 1.0000])
+Training kernel only z=1a
+tensor([3.0000, 0.8799, 0.1530, 1.0000])
+tensor([3.0000, 2.0000, 0.5000, 1.0000])
+(tensor([2.]), tensor([0.5000]))
+z=1a sampler done
+z=2a sampler done
+z=3a sampler done
+z=4a sampler done
+z=5a sampler done
+z=6a sampler done
+z=7a sampler done
+z=8a sampler done
+z=9a sampler done
+z=10a sampler done
+z=11a sampler done
+z=12a sampler done
+z=NNPDF(4) sampler done
+z=NNPDF(10) sampler done
+z=NNPDF(25) sampler done
+  0%|          | 0/3299 [00:00<?, ?it/s]  1%|          | 30/3299 [00:26<47:15,  1.15it/s]  2%|▏         | 60/3299 [00:51<46:37,  1.16it/s]  3%|▎         | 90/3299 [01:17<45:55,  1.16it/s]  4%|▎         | 120/3299 [01:42<45:21,  1.17it/s]  5%|▍         | 150/3299 [02:08<45:06,  1.16it/s]  5%|▌         | 180/3299 [02:35<44:51,  1.16it/s]  6%|▋         | 210/3299 [03:01<44:28,  1.16it/s]  7%|▋         | 240/3299 [03:26<43:55,  1.16it/s]  8%|▊         | 270/3299 [03:52<43:34,  1.16it/s]  9%|▉         | 300/3299 [04:18<43:03,  1.16it/s] 10%|█         | 330/3299 [04:44<42:35,  1.16it/s] 11%|█         | 360/3299 [05:09<42:04,  1.16it/s] 12%|█▏        | 390/3299 [05:35<41:30,  1.17it/s] 13%|█▎        | 420/3299 [06:00<41:01,  1.17it/s] 14%|█▎        | 450/3299 [06:26<40:34,  1.17it/s] 15%|█▍        | 480/3299 [06:51<40:01,  1.17it/s] 15%|█▌        | 510/3299 [07:17<39:45,  1.17it/s] 16%|█▋        | 540/3299 [07:43<39:20,  1.17it/s] 17%|█▋        | 570/3299 [08:08<38:46,  1.17it/s] 18%|█▊        | 600/3299 [08:34<38:24,  1.17it/s] 19%|█▉        | 630/3299 [09:00<37:55,  1.17it/s] 20%|██        | 660/3299 [09:25<37:23,  1.18it/s] 21%|██        | 690/3299 [09:50<36:40,  1.19it/s] 22%|██▏       | 720/3299 [10:14<35:58,  1.19it/s] 23%|██▎       | 750/3299 [10:39<35:24,  1.20it/s] 24%|██▎       | 780/3299 [11:04<34:50,  1.21it/s] 25%|██▍       | 810/3299 [11:28<34:19,  1.21it/s] 25%|██▌       | 840/3299 [11:53<33:49,  1.21it/s] 26%|██▋       | 870/3299 [12:18<33:22,  1.21it/s] 27%|██▋       | 900/3299 [12:42<32:57,  1.21it/s] 28%|██▊       | 930/3299 [13:07<32:32,  1.21it/s] 29%|██▉       | 960/3299 [13:32<32:06,  1.21it/s] 30%|███       | 990/3299 [13:57<31:43,  1.21it/s] 31%|███       | 1020/3299 [14:21<31:20,  1.21it/s] 32%|███▏      | 1050/3299 [14:46<30:57,  1.21it/s] 33%|███▎      | 1080/3299 [15:11<30:33,  1.21it/s] 34%|███▎      | 1110/3299 [15:36<30:05,  1.21it/s] 35%|███▍      | 1140/3299 [16:00<29:40,  1.21it/s] 35%|███▌      | 1170/3299 [16:25<29:20,  1.21it/s] 36%|███▋      | 1200/3299 [16:50<28:55,  1.21it/s] 37%|███▋      | 1230/3299 [17:15<28:33,  1.21it/s] 38%|███▊      | 1260/3299 [17:40<28:10,  1.21it/s] 39%|███▉      | 1290/3299 [18:05<27:47,  1.20it/s] 40%|████      | 1320/3299 [18:30<27:17,  1.21it/s] 41%|████      | 1350/3299 [18:55<26:53,  1.21it/s] 42%|████▏     | 1380/3299 [19:19<26:27,  1.21it/s] 43%|████▎     | 1410/3299 [19:44<26:02,  1.21it/s] 44%|████▎     | 1440/3299 [20:09<25:36,  1.21it/s] 45%|████▍     | 1470/3299 [20:34<25:11,  1.21it/s] 45%|████▌     | 1500/3299 [20:58<24:45,  1.21it/s] 46%|████▋     | 1530/3299 [21:23<24:21,  1.21it/s] 47%|████▋     | 1560/3299 [21:48<23:55,  1.21it/s] 48%|████▊     | 1590/3299 [22:13<23:28,  1.21it/s] 49%|████▉     | 1620/3299 [22:37<23:02,  1.21it/s] 50%|█████     | 1650/3299 [23:02<22:35,  1.22it/s] 51%|█████     | 1680/3299 [23:26<22:10,  1.22it/s] 52%|█████▏    | 1710/3299 [23:51<21:46,  1.22it/s] 53%|█████▎    | 1740/3299 [24:16<21:22,  1.22it/s] 54%|█████▎    | 1770/3299 [24:41<20:58,  1.22it/s] 55%|█████▍    | 1800/3299 [25:05<20:33,  1.22it/s] 55%|█████▌    | 1830/3299 [25:30<20:09,  1.21it/s] 56%|█████▋    | 1860/3299 [25:55<19:45,  1.21it/s] 57%|█████▋    | 1890/3299 [26:19<19:21,  1.21it/s] 58%|█████▊    | 1920/3299 [26:44<18:58,  1.21it/s] 59%|█████▉    | 1950/3299 [27:09<18:33,  1.21it/s] 60%|██████    | 1980/3299 [27:34<18:07,  1.21it/s] 61%|██████    | 2010/3299 [27:59<17:43,  1.21it/s] 62%|██████▏   | 2040/3299 [28:23<17:19,  1.21it/s] 63%|██████▎   | 2070/3299 [28:48<16:53,  1.21it/s] 64%|██████▎   | 2100/3299 [29:13<16:27,  1.21it/s] 65%|██████▍   | 2130/3299 [29:37<16:01,  1.22it/s] 65%|██████▌   | 2160/3299 [30:02<15:38,  1.21it/s] 66%|██████▋   | 2190/3299 [30:27<15:15,  1.21it/s] 67%|██████▋   | 2220/3299 [30:52<14:52,  1.21it/s] 68%|██████▊   | 2250/3299 [31:17<14:29,  1.21it/s] 69%|██████▉   | 2280/3299 [31:42<14:04,  1.21it/s] 70%|███████   | 2310/3299 [32:07<13:40,  1.21it/s] 71%|███████   | 2340/3299 [32:32<13:15,  1.21it/s] 72%|███████▏  | 2370/3299 [32:56<12:50,  1.21it/s] 73%|███████▎  | 2400/3299 [33:21<12:25,  1.21it/s] 74%|███████▎  | 2430/3299 [33:46<12:01,  1.20it/s] 75%|███████▍  | 2460/3299 [34:11<11:37,  1.20it/s] 75%|███████▌  | 2490/3299 [34:36<11:13,  1.20it/s] 76%|███████▋  | 2520/3299 [35:01<10:49,  1.20it/s] 77%|███████▋  | 2550/3299 [35:27<10:26,  1.20it/s] 78%|███████▊  | 2580/3299 [35:52<10:00,  1.20it/s] 79%|███████▉  | 2610/3299 [36:17<09:35,  1.20it/s] 80%|████████  | 2640/3299 [36:42<09:10,  1.20it/s] 81%|████████  | 2670/3299 [37:07<08:45,  1.20it/s] 82%|████████▏ | 2700/3299 [37:32<08:19,  1.20it/s] 83%|████████▎ | 2730/3299 [37:57<07:54,  1.20it/s] 84%|████████▎ | 2760/3299 [38:22<07:29,  1.20it/s] 85%|████████▍ | 2790/3299 [38:47<07:03,  1.20it/s] 85%|████████▌ | 2820/3299 [39:12<06:39,  1.20it/s] 86%|████████▋ | 2850/3299 [39:37<06:14,  1.20it/s] 87%|████████▋ | 2880/3299 [40:02<05:49,  1.20it/s] 88%|████████▊ | 2910/3299 [40:27<05:24,  1.20it/s] 89%|████████▉ | 2940/3299 [40:52<04:59,  1.20it/s] 90%|█████████ | 2970/3299 [41:17<04:34,  1.20it/s] 91%|█████████ | 3000/3299 [41:42<04:09,  1.20it/s] 92%|█████████▏| 3030/3299 [42:07<03:43,  1.20it/s] 93%|█████████▎| 3060/3299 [42:32<03:18,  1.20it/s] 94%|█████████▎| 3090/3299 [42:57<02:53,  1.20it/s] 95%|█████████▍| 3120/3299 [43:22<02:28,  1.20it/s] 95%|█████████▌| 3150/3299 [43:46<02:02,  1.21it/s] 96%|█████████▋| 3180/3299 [44:09<01:36,  1.24it/s] 97%|█████████▋| 3210/3299 [44:31<01:09,  1.27it/s] 98%|█████████▊| 3240/3299 [44:52<00:44,  1.31it/s] 99%|█████████▉| 3270/3299 [45:13<00:21,  1.35it/s]100%|██████████| 3299/3299 [45:31<00:00,  1.21it/s]
+accepted: 3299
+rejected: 0
+acceptance rate: 1.0
+total samples: 3299
+#################Sampling done###########################
+Current date and time : 2025-04-23 00:15:20

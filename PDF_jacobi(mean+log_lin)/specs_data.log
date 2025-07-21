@@ -1,0 +1,346 @@
+no change     /sciclone/apps/miniforge3-24.9.2-0/condabin/conda
+no change     /sciclone/apps/miniforge3-24.9.2-0/bin/conda
+no change     /sciclone/apps/miniforge3-24.9.2-0/bin/conda-env
+no change     /sciclone/apps/miniforge3-24.9.2-0/bin/activate
+no change     /sciclone/apps/miniforge3-24.9.2-0/bin/deactivate
+no change     /sciclone/apps/miniforge3-24.9.2-0/etc/profile.d/conda.sh
+no change     /sciclone/apps/miniforge3-24.9.2-0/etc/fish/conf.d/conda.fish
+no change     /sciclone/apps/miniforge3-24.9.2-0/shell/condabin/Conda.psm1
+no change     /sciclone/apps/miniforge3-24.9.2-0/shell/condabin/conda-hook.ps1
+no change     /sciclone/apps/miniforge3-24.9.2-0/lib/python3.12/site-packages/xontrib/conda.xsh
+no change     /sciclone/apps/miniforge3-24.9.2-0/etc/profile.d/conda.csh
+no change     /sciclone/home/yacahuanamedra/.bashrc
+No action taken.
+Python path: /sciclone/home/yacahuanamedra/.conda/envs/gptorch/bin/python3
+Python 3.12.2
+Running on node: fm09.sciclone.wm.edu
+Running on CPUs: fm09
+SLURM job ID: 1608126
+SLURM job name: PDF_jacobi(mean+log_lin)
+In directory: /sciclone/scr-lst/yacahuanamedra/GP
+Starting Python at Thu May 29 04:50:16 PM EDT 2025
+Starting GP
+Using device: cpu
+Checkpoint 2: imports done
+sys.argv: ['run_IS.py', '--mean', 'PDF', '--ker', 'jacobi', '--mode', 'mean', '--grid', 'log_lin']
+Using mean model: PDF, kernel model: jacobi, mode: mean, grid: log_lin
+/sciclone/home/yacahuanamedra/.conda/envs/gptorch/lib/python3.12/site-packages/torch/functional.py:513: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /opt/conda/conda-bld/pytorch_1724789563135/work/aten/src/ATen/native/TensorShape.cpp:3609.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+/sciclone/home/yacahuanamedra/.conda/envs/gptorch/lib/python3.12/site-packages/torchquad/integration/utils.py:248: UserWarning: DEPRECATION WARNING: In future versions of torchquad, an array-like object will be returned.
+  warnings.warn(
+#################Define the model###########################
+Current date and time : 2025-05-29 16:50:31
+GP specifications 
+ Sampling or training: mean
+ model: PDF
+ kernel: jacobi nugget: no
+ Ioffe time Distribution: Re(M) 
+ mean = tensor([-1.,  0.,  0.]) 
+ sigma = tensor([ 2., 15., 15.]) 
+ prior dist = tensor([2, 2, 2]) 
+ model init = (0.0, 1.0, 2.0) 
+ kernel init = (2.5, 0.1, 1.0, 1.0) 
+ device = cpu 
+ mode = mean 
+ ID = 12
+z=NNPDF(4) done
+z=NNPDF(10) done
+z=NNPDF(25) done
+#################Define the model###########################
+Current date and time : 2025-05-29 16:50:54
+GP specifications 
+ Sampling or training: mean
+ model: PDF
+ kernel: jacobi nugget: no
+ Ioffe time Distribution: Im(M) 
+ mean = tensor([-1.,  0.,  0.]) 
+ sigma = tensor([ 2., 15., 15.]) 
+ prior dist = tensor([2, 2, 2]) 
+ model init = (0.0, 1.0, 2.0) 
+ kernel init = (2.5, 0.1, 1.0, 1.0) 
+ device = cpu 
+ mode = mean 
+ ID = 12
+z=NNPDF(4) done
+z=NNPDF(10) done
+z=NNPDF(25) done
+Checkpoint 3: Model definitions done
+Checkpoint 4: Training models
+/sciclone/scr-lst/yacahuanamedra/GP/GP.py:492: UserWarning: The use of `x.T` on tensors of dimension other than 2 to reverse their shape is deprecated and it will throw an error in a future release. Consider `x.mT` to transpose batches of matrices or `x.permute(*torch.arange(x.ndim - 1, -1, -1))` to reverse the dimensions of a tensor. (Triggered internally at /opt/conda/conda-bld/pytorch_1724789563135/work/aten/src/ATen/native/TensorShape.cpp:3697.)
+  nlp= 0.5*(X@X.T+ 2*tr.logdet(L))
+Training kernel only z=1a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training kernel only z=2a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training kernel only z=3a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training kernel only z=4a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training kernel only z=5a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training kernel only z=6a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training kernel only z=7a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training kernel only z=8a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training kernel only z=9a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.1100, 0.9899, 1.0100, 1.0000])
+Training kernel only z=10a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.1100, 1.0100, 1.0100, 1.0000])
+Training kernel only z=11a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.0901, 1.0100, 1.0100, 1.0000])
+Training kernel only z=12a
+tensor([0.0000, 1.0000, 2.0000, 2.4900, 0.0900, 1.0100, 1.0100, 1.0000])
+Training kernel only z=NNPDF(4)
+tensor([0.0000, 1.0000, 2.0000, 1.3790, 0.6179, 0.2627, 1.6741, 1.0000])
+Training kernel only z=NNPDF(10)
+tensor([0.0000, 1.0000, 2.0000, 1.3790, 0.6172, 0.3740, 1.5965, 1.0000])
+Training kernel only z=NNPDF(25)
+tensor([0.0000, 1.0000, 2.0000, 1.3791, 0.6096, 0.5019, 1.5008, 1.0000])
+time 55.16985821723938
+Training mean only z=1a
+NaN detected in the input
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected in the prior
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected
+tensor([   nan,    nan,    nan, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training mean only z=2a
+NaN detected in the input
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected in the prior
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected
+tensor([   nan,    nan,    nan, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training mean only z=3a
+NaN detected in the input
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected in the prior
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected
+tensor([   nan,    nan,    nan, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training mean only z=4a
+NaN detected in the input
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected in the prior
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected
+tensor([   nan,    nan,    nan, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training mean only z=5a
+NaN detected in the input
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected in the prior
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected
+tensor([   nan,    nan,    nan, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training mean only z=6a
+NaN detected in the input
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected in the prior
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected
+tensor([   nan,    nan,    nan, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training mean only z=7a
+NaN detected in the input
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected in the prior
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected
+tensor([   nan,    nan,    nan, 2.4900, 0.1100, 0.9900, 1.0100, 1.0000])
+Training mean only z=8a
+tensor([-0.0100,  1.0100,  2.0100,  2.4900,  0.1100,  0.9900,  1.0100,  1.0000])
+Training mean only z=9a
+tensor([-0.0100,  1.0100,  2.0100,  2.4900,  0.1100,  0.9899,  1.0100,  1.0000])
+Training mean only z=10a
+tensor([-0.0100,  1.0100,  2.0100,  2.4900,  0.1100,  1.0100,  1.0100,  1.0000])
+Training mean only z=11a
+tensor([-0.0100,  1.0100,  2.0100,  2.4900,  0.0901,  1.0100,  1.0100,  1.0000])
+Training mean only z=12a
+tensor([-0.0100,  1.0100,  2.0100,  2.4900,  0.0900,  1.0100,  1.0100,  1.0000])
+Training mean only z=NNPDF(4)
+NaN detected in the input
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected in the prior
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected
+tensor([   nan,    nan,    nan, 1.3790, 0.6179, 0.2627, 1.6741, 1.0000])
+Training mean only z=NNPDF(10)
+NaN detected in the input
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected in the prior
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected
+tensor([   nan,    nan,    nan, 1.3790, 0.6172, 0.3740, 1.5965, 1.0000])
+Training mean only z=NNPDF(25)
+NaN detected in the input
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected in the prior
+tensor([nan, nan, nan], requires_grad=True)
+NaN detected
+tensor([   nan,    nan,    nan, 1.3791, 0.6096, 0.5019, 1.5008, 1.0000])
+time 0.6144518852233887
+Checkpoint 4.1: Training Re model done
+Training kernel only z=1a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 0.9900, 0.9900, 1.0000])
+Training kernel only z=2a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 0.9906, 0.9900, 1.0000])
+Training kernel only z=3a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 1.0100, 0.9900, 1.0000])
+Training kernel only z=4a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 1.0100, 0.9900, 1.0000])
+Training kernel only z=5a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 1.0100, 0.9900, 1.0000])
+Training kernel only z=6a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 1.0100, 0.9900, 1.0000])
+Training kernel only z=7a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 1.0100, 0.9900, 1.0000])
+Training kernel only z=8a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 1.0100, 0.9900, 1.0000])
+Training kernel only z=9a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 1.0100, 0.9900, 1.0000])
+Training kernel only z=10a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 1.0100, 0.9900, 1.0000])
+Training kernel only z=11a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 1.0100, 0.9900, 1.0000])
+Training kernel only z=12a
+tensor([0.0000, 1.0000, 2.0000, 2.5100, 0.0900, 1.0100, 0.9900, 1.0000])
+Training kernel only z=NNPDF(4)
+tensor([ 0.0000e+00,  1.0000e+00,  2.0000e+00,  3.3372e+00, -1.9781e-03,
+         1.0861e+00,  1.0143e+00,  1.0000e+00])
+Training kernel only z=NNPDF(10)
+tensor([ 0.0000,  1.0000,  2.0000,  3.4504, -0.3564,  1.0926,  1.3199,  1.0000])
+Training kernel only z=NNPDF(25)
+tensor([0.0000, 1.0000, 2.0000, 3.4613, 0.0366, 1.3317, 1.1107, 1.0000])
+time 51.51656937599182
+Training mean only z=1a
+tensor([0.0100, 1.0100, 1.9900, 2.5100, 0.0900, 0.9900, 0.9900, 1.0000])
+Training mean only z=2a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  0.9906,  0.9900,  1.0000])
+Training mean only z=3a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  1.0100,  0.9900,  1.0000])
+Training mean only z=4a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  1.0100,  0.9900,  1.0000])
+Training mean only z=5a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  1.0100,  0.9900,  1.0000])
+Training mean only z=6a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  1.0100,  0.9900,  1.0000])
+Training mean only z=7a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  1.0100,  0.9900,  1.0000])
+Training mean only z=8a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  1.0100,  0.9900,  1.0000])
+Training mean only z=9a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  1.0100,  0.9900,  1.0000])
+Training mean only z=10a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  1.0100,  0.9900,  1.0000])
+Training mean only z=11a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  1.0100,  0.9900,  1.0000])
+Training mean only z=12a
+tensor([-0.0100,  1.0100,  2.0100,  2.5100,  0.0900,  1.0100,  0.9900,  1.0000])
+Training mean only z=NNPDF(4)
+tensor([-3.2989e-01,  1.1522e+00,  1.2167e+00,  3.3372e+00, -1.9781e-03,
+         1.0861e+00,  1.0143e+00,  1.0000e+00])
+Training mean only z=NNPDF(10)
+tensor([-0.2027,  0.9793,  1.5497,  3.4504, -0.3564,  1.0926,  1.3199,  1.0000])
+Training mean only z=NNPDF(25)
+tensor([-0.1863,  0.9810,  1.6319,  3.4613,  0.0366,  1.3317,  1.1107,  1.0000])
+time 25.025546312332153
+Checkpoint 4.2: Training Im model done
+Nans in the parameters
+Nans in the parameters
+Nans in the parameters
+Nans in the parameters
+Nans in the parameters
+Nans in the parameters
+Nans in the parameters
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Nans in the parameters
+Nans in the parameters
+Nans in the parameters
+Checkpoint 4.3: Saving min points for Re done
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Posterior 2nd level minimized
+Checkpoint 4.4: Saving min points for Im done
+Checkpoint 5: Integration setup done
+NaN detected in the input
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+NaN detected in the prior
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+Error in model averaging important sampling for Re z=1a, PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+NaN detected in the input
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+NaN detected in the prior
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+Error in model averaging important sampling for Re z=2a, PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+NaN detected in the input
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+NaN detected in the prior
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+Error in model averaging important sampling for Re z=3a, PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+NaN detected in the input
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+NaN detected in the prior
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+Error in model averaging important sampling for Re z=4a, PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+NaN detected in the input
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+NaN detected in the prior
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+Error in model averaging important sampling for Re z=5a, PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+NaN detected in the input
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+NaN detected in the prior
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+Error in model averaging important sampling for Re z=6a, PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+NaN detected in the input
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+NaN detected in the prior
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+Error in model averaging important sampling for Re z=7a, PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+Error in model averaging important sampling for Re z=8a, PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+NaN detected in the input
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+NaN detected in the prior
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+Error in model averaging important sampling for Re z=NNPDF(4), PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+NaN detected in the input
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+NaN detected in the prior
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+Error in model averaging important sampling for Re z=NNPDF(10), PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+NaN detected in the input
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+NaN detected in the prior
+tensor([nan, nan, nan], grad_fn=<ViewBackward0>)
+Error in model averaging important sampling for Re z=NNPDF(25), PDF, jacobi mean log_lin: torch.linalg.eig: input tensor should not contain infs or NaNs.
+Checkpoint 6: Model averaging gaussian def done
+### INITIALIZE MODEL AVERAGING PDF_jacobi(Re_mean) ###
+Traceback (most recent call last):
+  File "/sciclone/scr-lst/yacahuanamedra/GP/run_IS.py", line 166, in <module>
+    data_Re = Modelaveraging_importantsampling_gauss(fits_Re,nn,Nsamp,iB_Re,lista)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/sciclone/scr-lst/yacahuanamedra/GP/functions.py", line 160, in Modelaveraging_importantsampling_gauss
+    qofx,cov,pms,Qofv,covnu,Qvs=fits_comb[i].model_averaging_IS(2,nn,iB,prob=True,fullevi=True)
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/sciclone/scr-lst/yacahuanamedra/GP/GP.py", line 120, in model_averaging_IS
+    self.trace_IS=self.dist.sample((10000,))
+                  ^^^^^^^^^
+AttributeError: 'GaussianProcess' object has no attribute 'dist'
+Finished Python at Thu May 29 04:50:16 PM EDT 2025

@@ -1,0 +1,79 @@
+Running on 3
+/sciclone/home/yacahuanamedra/.conda/envs/gptorch/lib/python3.12/site-packages/torch/functional.py:513: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /opt/conda/conda-bld/pytorch_1724789563135/work/aten/src/ATen/native/TensorShape.cpp:3609.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+/sciclone/home/yacahuanamedra/.conda/envs/gptorch/lib/python3.12/site-packages/torchquad/integration/utils.py:248: UserWarning: DEPRECATION WARNING: In future versions of torchquad, an array-like object will be returned.
+  warnings.warn(
+/sciclone/pscr/yacahuanamedra/GP.py:340: UserWarning: The use of `x.T` on tensors of dimension other than 2 to reverse their shape is deprecated and it will throw an error in a future release. Consider `x.mT` to transpose batches of matrices or `x.permute(*torch.arange(x.ndim - 1, -1, -1))` to reverse the dimensions of a tensor. (Triggered internally at /opt/conda/conda-bld/pytorch_1724789563135/work/aten/src/ATen/native/TensorShape.cpp:3697.)
+  nlp= 0.5*(X@X.T+ 2*tr.logdet(L))
+GP started
+Device: cpu
+/sciclone/pscr/yacahuanamedra
+Namespace(i=3, Nsamples=1902, burn=0, L=100, eps=0.001, ITD='Im', mean='PDF_div', ker='Krbflog', mode='kernel', IDslurm='3', grid='log_lin', Nx=256)
+#################Define the model###########################
+Current date and time : 2025-04-23 07:23:41
+GP specifications 
+ Sampling or training: kernel
+ model: PDF_div
+ kernel: Krbflog nugget: no
+ Ioffe time Distribution: Im(M) 
+ mean = tensor([0., 0.]) 
+ sigma = tensor([15., 15.]) 
+ prior dist = tensor([2, 2]) 
+ model init = (3.0,) 
+ kernel init = (2.0, 0.5) 
+ device = cpu 
+ mode = kernel 
+ ID = 3
+z=NNPDF(4) done
+z=NNPDF(10) done
+z=NNPDF(25) done
+#################Define the model###########################
+Current date and time : 2025-04-23 07:24:02
+GP specifications 
+ Sampling or training: kernel
+ model: PDF_div
+ kernel: Krbflog nugget: no
+ Ioffe time Distribution: Im(M) 
+ mean = tensor([0., 0.]) 
+ sigma = tensor([15., 15.]) 
+ prior dist = tensor([2, 2]) 
+ model init = (3.0,) 
+ kernel init = (2.0, 0.5) 
+ device = cpu 
+ mode = kernel 
+ ID = 3
+z=NNPDF(4) done
+z=NNPDF(10) done
+z=NNPDF(25) done
+Training mean only z=4a
+Training kernel only z=NNPDF(25)
+tensor([3.0000, 1.4016, 0.9612, 1.0000])
+Training kernel only z=NNPDF(10)
+tensor([3.0000, 1.2598, 0.9766, 1.0000])
+Training kernel only z=NNPDF(4)
+tensor([3.0000, 1.0449, 0.9538, 1.0000])
+Training kernel only z=12a
+tensor([3.0000, 0.9846, 0.4584, 1.0000])
+Training kernel only z=11a
+tensor([3.0000, 0.9794, 0.5388, 1.0000])
+Training kernel only z=10a
+tensor([3.0000, 1.0420, 0.8312, 1.0000])
+Training kernel only z=9a
+tensor([3.0000, 1.0467, 0.9794, 1.0000])
+Training kernel only z=8a
+tensor([3.0000, 1.0410, 1.0118, 1.0000])
+Training kernel only z=7a
+tensor([3.0000, 1.0412, 1.0217, 1.0000])
+Training kernel only z=6a
+tensor([3.0000, 1.0462, 1.0380, 1.0000])
+Training kernel only z=5a
+tensor([3.0000, 1.0587, 1.0247, 1.0000])
+Training kernel only z=4a
+tensor([2.0703, 1.0604, 0.9947, 1.0000])
+Training kernel only z=3a
+tensor([3.0000, 1.1016, 0.9815, 1.0000])
+Training kernel only z=2a
+tensor([3.0000, 1.1266, 0.6889, 1.0000])
+Training kernel only z=1a
+tensor([3.0000, 1.2116, 0.2352, 1.0000])
+Posterior 2nd level minimized

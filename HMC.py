@@ -14,12 +14,16 @@ def autograd(func,x):
     y.backward()
     return x_tensor.grad
 
+
 class HMC_sampler():
     def __init__(self,logfunc,diagonal,device,grad=None):
         self.logfunc = logfunc
         self.device=device
         self.diagonal = diagonal.to(self.device)
         self.grad = grad
+        self.accepted = 0
+        self.rejected = 0
+
     def gibbs(self):
         self.p0 = tr.distributions.MultivariateNormal(tr.zeros_like(self.diagonal), covariance_matrix=tr.diag(self.diagonal)).sample().to(self.device)
         return self.p0
@@ -99,22 +103,33 @@ class HMC_sampler():
     def hamiltonian(self,q,p):
         return self.logfunc(q) + tr.sum(p**2)/2.0
     
-    def sample(self,q0,Nsamp,eps,L):
-        self.traceq = tr.zeros(Nsamp,q0.shape[0]).to(self.device)
-        self.tracep = tr.zeros(Nsamp,q0.shape[0]).to(self.device)
-        self.traceH = tr.zeros(Nsamp,1)
+    def sample(self,q0,Nsamp,eps,L,burn=0):
+        self.traceq = tr.zeros(Nsamp+burn,q0.shape[0]).to(self.device)
+        self.tracep = tr.zeros(Nsamp+burn,q0.shape[0]).to(self.device)
+        self.traceH = tr.zeros(Nsamp+burn,1)
         self.traceq[0] = self.q0
         self.p0 = self.gibbs()
         self.tracep[0] = self.p0
         self.eps=eps
         self.L=L
-        for i in tqdm(range(1,Nsamp),file=sys.stdout,miniters=Nsamp//100, maxinterval=float("inf")):
+        for i in tqdm(range(1,Nsamp+burn),file=sys.stdout,miniters=Nsamp//100, maxinterval=float("inf")):
             self.p0 = self.gibbs()
             q,p,ΔH = self.HMC_1(self.traceq[i-1],self.p0,self.eps,self.L)
+            if self.flag:
+                self.accepted += 1
+            else:
+                self.rejected += 1
                 
             self.traceq[i] = q
             self.tracep[i] = p
             self.traceH[i] = ΔH
+        self.traceq=self.traceq[burn:]
+        self.tracep=self.tracep[burn:]
+        self.traceH=self.traceH[burn:]
+        print('accepted:',self.accepted)
+        print('rejected:',self.rejected)
+        print('acceptance rate:',self.accepted/(self.accepted+self.rejected))
+        print('total samples:',self.accepted+self.rejected)
         return self.traceq,self.tracep,self.traceH
     
 

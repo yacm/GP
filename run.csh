@@ -4,8 +4,8 @@
 #SBATCH --time=72:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --output=/sciclone/pscr/yacahuanamedra/ToDo/output.log
-#SBATCH --error=/sciclone/pscr/yacahuanamedra/ToDo/output.log
+#SBATCH --output=/sciclone/scr-lst/yacahuanamedra/GP/ToDo/output.log
+#SBATCH --error=/sciclone/scr-lst/yacahuanamedra/GP/ToDo/output.log
 
 
 if [ "$#" -ne 7 ]; then
@@ -28,9 +28,15 @@ else
     data=15
 fi
 
+if [[ $(hostname) == fm* ]]; then
+    EXCLUDE="fm04,fm08,fm24"
+else
+    EXCLUDE=""
+fi
 
 CPU=$((TIMES * data - 1))
 ITER=$((ITERATIONS / TIMES))
+BURN=$((ITER/10))
 #NEWSLURMID=$SLURM
 
 # Create the folder if it doesn't exist
@@ -43,21 +49,24 @@ cat << EOF > $SLURM_SCRIPT
 #!/bin/tcsh
 
 #SBATCH --job-name=${MODEL}_${KERNEL_NAME}(${mode}+${grid})${ITD}
-#SBATCH --output=/sciclone/pscr/yacahuanamedra/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs/GP${ITD}_%a.log
-#SBATCH --error=/sciclone/pscr/yacahuanamedra/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs/GP${ITD}_%a.log
+#SBATCH --output=/sciclone/scr-lst/yacahuanamedra/GP/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs/GP${ITD}_%a.log
+#SBATCH --error=/sciclone/scr-lst/yacahuanamedra/GP/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs/GP${ITD}_%a.log
 #SBATCH --time=72:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --array=0-${CPU}
 #SBATCH --mem=1000M
+#SBATCH --exclude=${EXCLUDE}
 
 module load miniforge3/24.9.2-0
 conda activate gptorch
 
 @ NEWSLURMID = \$SLURM_ARRAY_TASK_ID % ${data}
+
 echo "Running on \$NEWSLURMID"
 
-python3 run.py --i \$NEWSLURMID --Nsamples ${ITER}  --L 100 --eps 0.001 --ITD ${ITD} --mean ${MODEL} --ker ${KERNEL_NAME} --mode ${mode}  --IDslurm \$SLURM_ARRAY_TASK_ID --grid ${grid} --Nx 256
+
+python3 run.py --i \$NEWSLURMID --Nsamples ${ITER} --burn ${BURN} --L 100 --eps 0.001 --ITD ${ITD} --mean ${MODEL} --ker ${KERNEL_NAME} --mode ${mode}  --IDslurm \$SLURM_ARRAY_TASK_ID --grid ${grid} --Nx 256
 EOF
 
 # Submit the job

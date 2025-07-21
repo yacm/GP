@@ -1,5 +1,5 @@
 import torch as tr
-
+print("GP started")
 if tr.backends.mps.is_available():
     device = tr.device("mps")
 
@@ -57,27 +57,6 @@ grid=args.grid
 Nx=args.Nx
 
 
-Np = 6
-Nz = 12
-Nj = 349
-rMj = np.empty([Nj,Np,Nz])
-nu = np.empty([Np,Nz])
-for p in range(1,Np+1):
-    for z in range (1,Nz+1):
-        nu[p-1,z-1] = 2.0*np.pi/32.0 *p *z
-        #print(p,z,nu[p-1,z-1])
-        m_4 = get_dist_matelem(z,p,4,ITD)
-        m_6 = get_dist_matelem(z,p,6,ITD)
-        m_8 = get_dist_matelem(z,p,8,ITD)
-        #expo fit
-        m = (m_4*m_8 - m_6**2)/(m_4 + m_8 - 2 * m_6)
-        # this fails for certain cases where the denomenator goes too close to zero
-        # use the m_6 as default
-        rMj[:,p-1,z-1] = m_6
-        #Nj=m.shape[0]
-        #print(z,p,np.mean(m_4),np.mean(m_6),np.mean(m_8), np.mean(m),np.std(m)*np.sqrt(Nj-1))
-rM = np.mean(rMj,axis=0)
-rMe = np.std(rMj,axis=0)*np.sqrt(Nj) 
 
 #from tensor to list
 def tensor2list(tensor):
@@ -89,7 +68,7 @@ def tensor2list(tensor):
 
 modelname=args.mean
 kernelname=args.ker
-nugget="yes"
+nugget="no"
 if mode=="mean":
     nugget="no"
  
@@ -101,11 +80,12 @@ mean,sigma,config,mod,ker,modfunc,kerfunc,device,mode,IDslurm,x_grid,lab=argumen
 momentum=tr.ones_like(mean)
 
 now = datetime.datetime.now()
-print ("Current date and time :", now.strftime("%Y-%m-%d %H:%M:%S"))
-print("GP specifications \n Sampling or training: "+mode+"\n model: "+modelname+"\n kernel: "+kernelname+" nugget: "+ nugget+"\n Ioffe time Distribution: "+ITD+"(M)","\n mean =",mean,"\n sigma =",sigma,"\n prior dist =",config,"\n model init =",mod,"\n kernel init =",ker,"\n momentum init =",momentum,"\n device =",device,"\n mode =",mode,"\n SLURM_ID =",IDslurm)
-print("#################Define the model###########################")
+#print ("Current date and time :", now.strftime("%Y-%m-%d %H:%M:%S"))
+#print("GP specifications \n Sampling or training: "+mode+"\n model: "+modelname+"\n kernel: "+kernelname+" nugget: "+ nugget+"\n Ioffe time Distribution: "+ITD+"(M)","\n mean =",mean,"\n sigma =",sigma,"\n prior dist =",config,"\n model init =",mod,"\n kernel init =",ker,"\n momentum init =",momentum,"\n device =",device,"\n mode =",mode,"\n SLURM_ID =",IDslurm)
+#print("#################Define the model###########################")
 fits_comb=[]
 #print("0=gaussian, 1=lognormal, 2=expbeta")
+fits_comb=Modeldef(ITD,modelname,kernelname,nugget,device,mode,IDslurm,test,grid,Nx)
 fits_comb=Modeldef(ITD,modelname,kernelname,nugget,device,mode,IDslurm,test,grid,Nx)
 
 
@@ -131,7 +111,7 @@ Ntrain=1000
 function="nlp"
 i=args.i
 
-lr=1e-3
+lr=1e-4
 for i in reversed(range(0,15)):
     if i in [111]:
         fits_comb[i].train(Ntrain,lr=lr*10,mode=mode,function=function)
@@ -143,6 +123,7 @@ for i in reversed(range(0,15)):
 #end=time.time()
 #print("time",end-start)
 #look for nans in the parameters
+
 i=args.i
 def nans(tup):
     for i in range(len(tup)):
@@ -152,6 +133,10 @@ def nans(tup):
 
 i=args.i
 
+if fits_comb[i].modelname=="PDF_con" or fits_comb[i].modelname=="PDF_div":
+    fits_comb[i].hyperparametersvalues(set="original")
+
+print(tr.tensor(fits_comb[i].pd_args +fits_comb[i].ker_args  + (fits_comb[i].sig,)))
 
 if nans(fits_comb[i].ker_args):
     fits_comb[i].hyperparametersvalues(set="original")
@@ -201,7 +186,7 @@ burn=args.burn
 L=args.L
 eps=args.eps
 
-traceq,tracep,traceH=samplers[i].sample(samplers[i].q0,Nsamples,eps,L)#,update=1)
+traceq,tracep,traceH=samplers[i].sample(samplers[i].q0,Nsamples,eps,L,burn=burn)
 tr.save(traceq,'%s_%s(%s+%s)/K%s(%s)%s.pt' %(modelname,kernelname,mode,grid,ITD,fits_comb[i].name,IDslurm))
 
 print("#################Sampling done###########################")
