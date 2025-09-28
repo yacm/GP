@@ -1,3 +1,16 @@
 NNPDF/NNPDF40_nnlo_as_01180_1000_pdf_minus.dat
 NNPDF/NNPDF40_nnlo_as_01180_1000_pdf_plus.dat
 QCproject/
+Jack_data/
+PDFc*
+PDFd*
+PDF_r*
+pdf-data 
+QC_data.ipynb 
+PDF_N* 
+PDF_K* 
+g_flat_*
+__pycache__/
+.ipynb_checkpoints/
+.vscode/
+NNPDF/

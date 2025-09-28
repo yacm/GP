@@ -907,7 +907,7 @@ def Krbf_fast(x,s,w):
 def Kpoly(x,s,t,a,b):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
-    return s**2*((xx*yy)**a*((1-xx)*(1-yy))**b)/((1-t*xx)*(1-t*yy))
+    return s*((xx*yy)**a*((1-xx)*(1-yy))**b)/((1-t*xx)*(1-t*yy))
 
 def Kpoly1(x,s,a,b):
     xx=x.view(1,x.shape[0])
@@ -1105,10 +1105,15 @@ def Kdebbioxb(x,l0,sig,b,eps=1e-13):
     yy=x.view(x.shape[0],1)
     return (1-xx)**b*sig**2*tr.sqrt(2*l(xx,l0,eps)*l(yy,l0,eps)/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*tr.exp(-(xx-yy)**2/(l(xx,l0,eps)**2+l(yy,l0,eps)**2))*(1-yy)**b
 
-def KSM(x,s1,l1,m1,s2,l2,m2):
+def KSM_bad(x,s1,l1,m1,s2,l2,m2):
     xx=x.view(1,x.shape[0])
     yy=x.view(x.shape[0],1)
     return s1*tr.exp(-0.5*((xx - yy)**2/l1**2))*tr.cos(m1*(xx-yy)**2)+s2*tr.exp(-0.5*((xx - yy)**2/l2**2))*tr.cos(m2*(xx-yy)**2)
+
+def KSM(x,s1,l1,m1,s2,l2,m2):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return s1*tr.exp(-0.5*((xx - yy)**2/l1**2))*tr.cos(2*tr.pi*m1*(xx-yy))+s2*tr.exp(-0.5*((xx - yy)**2/l2**2))*tr.cos(2*tr.pi*m2*(xx-yy))
 
 def R(z,t):
     return tr.sqrt(1-2*z*t+t*t)
@@ -1373,7 +1378,7 @@ def covfilter(cov,n):
                 cov[i,j]=0
     return cov
 
-def NNPDFdata(datanu,x_grid,regulator,lamb,ITD="Re"):
+def NNPDFdata(datanu,x_grid,regulator,lamb,ITD="Re",corr=True):
     nu_d_grid = datanu.T[1]
     numax=nu_d_grid.shape[0]
     #print("numax: ",numax)
@@ -1410,6 +1415,9 @@ def NNPDFdata(datanu,x_grid,regulator,lamb,ITD="Re"):
     else:
         regu= 1e-4*np.diag(np.diag(CovD))
     #CovD=np.abs(CovD)
+
+    if not corr:
+        CovD = np.diag(np.diag(CovD))
 
     fe = FE2_Integrator(x_grid)
     B0 = fe.set_up_integration(Kernel=lambda z: 1)
@@ -1872,7 +1880,7 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx,ITD):
         meank=tr.tensor([0.0,-1.0,0.0,0.0])
         sigmak=tr.tensor([10.0,2.0,10.0,10.0])
         configk=tr.tensor([2,2,2,2])
-        ker=(1.5,0.5,1.0,1.0)
+        ker=(4.0,0.5,-0.1,3.0)
         labk=['σ','t','a','b']
         kerfunc=Kpoly
     
