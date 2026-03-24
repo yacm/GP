@@ -196,7 +196,7 @@ class GaussianProcess():
                 CpMat = K - VK.T@iChat@VK
                 CpMat=truncatecov(CpMat)
                 CpMat=tr.tensor(CpMat).to(self.device)
-                CpMat= (CpMat+CpMat.T)/2.0+ 1e-6*tr.eye(CpMat.shape[0]).to(self.device)
+                CpMat= (CpMat+CpMat.T)/2.0+ 1e-9*tr.eye(CpMat.shape[0]).to(self.device) #1e-6
                 if CpMat.isinf().any() or CpMat.isnan().any():
                     self.mean_eliminated+=1
                     continue
@@ -288,7 +288,7 @@ class GaussianProcess():
                 CpMat = K - VK.T@iChat@VK
                 CpMat=truncatecov(CpMat)
                 CpMat=tr.tensor(CpMat).to(self.device)
-                CpMat= (CpMat+CpMat.T)/2.0+ 1e-6*tr.eye(CpMat.shape[0]).to(self.device)
+                CpMat= (CpMat+CpMat.T)/2.0+ 1e-9*tr.eye(CpMat.shape[0]).to(self.device)
                 Pm = Pd +VK.T@iChat@(self.Y-self.V@Pd)
                 if Pm.isinf().any() or Pm.isnan().any() or CpMat.isinf().any() or CpMat.isnan().any():
                     self.sigma_eliminated+=1

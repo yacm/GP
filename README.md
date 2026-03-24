@@ -13,3 +13,17 @@ Check all the available kernels and prior set ups in functions.py
 The arguments of run.csh/setjlab.sh goes as follow:
 
 (PDF model) (kernel) (ITD) (number of parallel chains for HMC) (# total samples) (which parameters are going to be sampled) (grid preference)
+
+```bash
+./samplecriteria.sh polylog1_no_s= 0.1 1.0 0.1 NNPDF "all kernel mean"
+```
+
+The arguments of samplecriteria.sh goes as follow:
+
+1) kernelname
+2) initial
+3) final
+4) step
+5) Type of data (NNPDF or Colins)
+6) modes(training all parameters, only kernel, only mean)
+

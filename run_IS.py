@@ -48,6 +48,7 @@ parser.add_argument('--mean',type=str,default="PDF", help='Prior mean model')
 parser.add_argument('--ker',type=str,default="rbf_logrbf", help='Kernel model')
 parser.add_argument('--mode',type=str,default="all", help='Important sampling or training over this parameters(kernel, mean, all)')
 parser.add_argument('--grid',type=str,default='log_lin',help='linear(lin) or log/lin')
+parser.add_argument('--data',type=str,default='NNPDF',help='Colins or NNPDF')
 
 import sys
 print("sys.argv:", sys.argv, flush=True)
@@ -57,19 +58,20 @@ models=args.mean
 kernels=args.ker
 modes=args.mode
 grids=args.grid
+test=args.data
 
-print(f"Using mean model: {models}, kernel model: {kernels}, mode: {modes}, grid: {grids}", flush=True)
+print(f"Using mean model: {models}, kernel model: {kernels}, mode: {modes}, grid: {grids}, data: {test}", flush=True)
 
 nugget="no" #only if you want to do another regularization for our GP
 device="cpu"
 #mode="all"
 #grid="lin"
 #grid2="log_lin"
-test="NNPDF"
+#test="NNPDF"#change to Colins or NNPDF
 ID=12
 Nx=128*2
 
-lambdass=[1e-5,1e-6]
+lambdass=[1e-5,1e-5]
 
 
 fits_Re=Modeldef("Re",models,kernels,nugget,device,modes,ID,test,grids,Nx,lambdass)
@@ -101,7 +103,7 @@ def trainmod1(fits):
 
 def trainmod(fits):
     Ntrain=5000
-    lr=5e-4
+    lr=1e-3
     lik="nlp"
 
     if fits[0].mode=="all":
@@ -111,7 +113,9 @@ def trainmod(fits):
             train_model(fits,Ntrain,lik,lr,"kernel")
         else:
             #train_model(fits,Ntrain,"evidence",lr,"mean")
+            print("Training kernel first")
             train_model(fits,Ntrain,lik,lr,"kernel")
+
     elif fits[0].mode=="mean":
         if fits[0].kernelname in ["rbf_logrbf_l","Kdebbioxa","Krbflog"] or re.match( r'^Krbflog_no_sn=(-?\d+\.\d+)$', fits[0].kernelname): #rbf_deb
             #train_model(fits,Ntrain,"evidence",lr,"kernel")
@@ -119,6 +123,21 @@ def trainmod(fits):
         else:
             #train_model(fits,Ntrain,"evidence",lr,"kernel")     ###criteria p=30%
             train_model(fits,Ntrain,lik,lr,"mean")
+
+def trainmod2(fits):
+    Ntrain=5000
+    lr=1e-3
+    lik="nlp"
+
+    if fits[0].mode=="all":
+        print("Training all parameters")
+        train_model(fits,Ntrain,lik,lr,"all")
+    elif fits[0].mode=="kernel":
+        print("Training kernel parameters")
+        train_model(fits,Ntrain,lik,lr,"kernel")
+    elif fits[0].mode=="mean":
+        print("Training mean parameters")
+        train_model(fits,Ntrain,lik,lr,"mean")
 
 
 nn = np.linspace(0,100,128)
@@ -170,22 +189,25 @@ def criteria_single_model(fits_comb,data):
         DeltaM=tr.diag(gps.Gamma)[numax]**0.5
         absM=tr.abs(gps.Y[numax])#/2
         DeltaM_th=tr.max(tr.diag(data[3][ii])**0.5)
+        if gps.name=="z=9a":
+            absM=tr.abs(gps.Y[numax-1])#/2
+            DeltaM=tr.diag(gps.Gamma)[numax-1]**0.5
         if DeltaM_th>=tr.max((1+p)*DeltaM,p*absM):
             print(f"{gps.modelname}_{gps.kernelname}_{gps.ITD}_{gps.mode}_{gps.gridname}")#,DeltaM_th,(1+p)*DeltaM,p*absM)
             #fits_comb, data, modelname, kernelname, ITD,grid= gps
-            if gps.name=="z=NNPDF(4)":
+            if gps.name=="z=NNPDF(4)" or gps.name=="z=3a":
                 lista_12.append(f"{gps.modelname}_{gps.kernelname}_{gps.ITD}_{gps.mode}_{gps.gridname}")
-                print(f"z=NNPDF(4) passed")
+                print(f"{gps.name} passed")
                 #save a file calles pass_z=NNPDF(4).pt
                 tr.save(tr.tensor([1]), "%s_%s(%s+%s)/pass_%s_%s.pt" %(gps.modelname,gps.kernelname,gps.mode,gps.gridname,gps.ITD,gps.name))
-            elif gps.name=="z=NNPDF(10)":
+            elif gps.name=="z=NNPDF(10)" or gps.name=="z=6a":
                 lista_13.append(f"{gps.modelname}_{gps.kernelname}_{gps.ITD}_{gps.mode}_{gps.gridname}")
-                print(f"z=NNPDF(10) passed")
+                print(f"{gps.name} passed")
                 #save a file calles pass_z=NNPDF(10).pt
                 tr.save(tr.tensor([1]), "%s_%s(%s+%s)/pass_%s_%s.pt" %(gps.modelname,gps.kernelname,gps.mode,gps.gridname,gps.ITD,gps.name))
-            elif gps.name=="z=NNPDF(25)":
+            elif gps.name=="z=NNPDF(25)" or gps.name=="z=9a":
                 lista_14.append(f"{gps.modelname}_{gps.kernelname}_{gps.ITD}_{gps.mode}_{gps.gridname}")
-                print(f"z=NNPDF(25) passed")
+                print(f"{gps.name} passed")
                 #save a file calles pass_z=NNPDF(25).pt
                 tr.save(tr.tensor([1]), "%s_%s(%s+%s)/pass_%s_%s.pt" %(gps.modelname,gps.kernelname,gps.mode,gps.gridname,gps.ITD,gps.name))
     #print("Total number of models with a posterior error greater than the prior error: ",mod,"/", len(modelss))
@@ -225,11 +247,27 @@ if fits_Re[0].mode=="mean":
 print("Checkpoint 4: Training models", flush=True)
 
 trainmod(fits_Re)
+print("hola")
+#train_model(fits_Re,5000,"nlp",1e-3,modes)
 print("Checkpoint 4.1: Training Re model done", flush=True)
 trainmod(fits_Im)
+print("hola2")
+#train_model(fits_Im,5000,"nlp",1e-3,modes)
+
 print("Checkpoint 4.2: Training Im model done", flush=True)
 
+# Remove previous pass files if they exist
+import os
 
+path = "/sciclone/pscr/yacahuanamedra/GP"
+
+for fname in ["pass_Im_z=9a.pt", "pass_Re_z=9a.pt"]:
+    full_path = os.path.join(path, fname)
+    if os.path.exists(full_path):
+        os.remove(full_path)
+        print(f"{fname} deleted.")
+    else:
+        print(f"{fname} not found in {path}.")
 
 
 save_min(fits_Re)

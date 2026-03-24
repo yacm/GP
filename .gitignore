@@ -7,10 +7,11 @@ PDFd*
 PDF_r*
 pdf-data 
 QC_data.ipynb 
-PDF_N* 
+PDF_N_* 
 PDF_K* 
 g_flat_*
 __pycache__/
 .ipynb_checkpoints/
 .vscode/
 NNPDF/
+INNpaper.pdf

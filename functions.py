@@ -68,19 +68,92 @@ def restart(fits_comb):
     number=len(fits_comb)
     for i in range(0,number):
         fits_comb[i].hyperparametersvalues()
+    
+
 def train_model(fits_comb,Ntrain,function,lr,mode):
     start=time.time()
     number=len(fits_comb)
     for i in range(0,number):
         #mode =fits_comb[i].mode
         #print(fits_comb[i].mode)
-        if i in [12,13,14]:
-            fits_comb[i].train(Ntrain,lr=lr,mode=mode,function=function)
-        else:
-            fits_comb[i].train(1,lr=1e-4,mode=mode,function=function)
+        fits_comb[i].train(Ntrain,lr=lr,mode=mode,function=function)
         print(tr.tensor(fits_comb[i].pd_args +fits_comb[i].ker_args  + (fits_comb[i].sig,)),flush=True)
     end=time.time()
     print("time",end-start)
+
+
+def remove_row_col(matrix: tr.Tensor, i: int) -> tr.Tensor:
+
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
+        raise ValueError("Input must be a square matrix.")
+    if not (0 <= i < matrix.shape[0]):
+        raise IndexError("Index i is out of bounds.")
+
+    # Remove the i-th row
+    matrix = tr.cat((matrix[:i], matrix[i+1:]), dim=0)
+    # Remove the i-th column
+    matrix = tr.cat((matrix[:, :i], matrix[:, i+1:]), dim=1)
+    
+    return matrix
+
+def insert_row_col(matrix: tr.Tensor, i: int, row: tr.Tensor = None, col: tr.Tensor = None, diag_value: float = 0.0) -> tr.Tensor:
+    N = matrix.shape[0]
+    if row is None:
+        row = tr.zeros(N, dtype=matrix.dtype, device=matrix.device)
+    if col is None:
+        col = tr.zeros(N, dtype=matrix.dtype, device=matrix.device)
+    top = tr.cat((matrix[:i, :i], col[:i].unsqueeze(1), matrix[:i, i:]), dim=1)
+    middle = tr.cat((row[:i], tr.tensor([diag_value], dtype=matrix.dtype, device=matrix.device), row[i:]))
+    bottom = tr.cat((matrix[i:, :i], col[i:].unsqueeze(1), matrix[i:, i:]), dim=1)
+    return tr.cat((top, middle.unsqueeze(0), bottom), dim=0)
+
+def KL_divergence_x(xgrid,qbar,H,g,K):
+
+    qbar = qbar.to("cpu")
+    H = H.to("cpu")
+    g = g.to("cpu")
+    K = K.to("cpu")
+    xgrid = xgrid.to("cpu")
+    jitter = 1e-12 # initials
+    max_jitter = 1e-4
+    
+    try:
+        H_inv=tr.linalg.inv(H)
+        K_inv=tr.linalg.inv(K)
+
+    except tr.linalg.LinAlgError as e:
+        print("Matrix inversion failed:", e)
+        while jitter < max_jitter:
+            try:
+                H_inv = tr.linalg.inv(H + jitter * tr.eye(H.shape[0], device=H.device))
+                K_inv = tr.linalg.inv(K + jitter * tr.eye(K.shape[0], device=K.device))
+                break
+            except tr.linalg.LinAlgError:
+                jitter *= 5
+            
+
+    row = tr.zeros(xgrid.shape[0]-1)
+    col = tr.zeros(xgrid.shape[0]-1)
+    KL=tr.zeros_like(xgrid)
+    for l in range(xgrid.shape[0]):
+        h=remove_row_col(H_inv,l)
+        h_id = insert_row_col(h, i=0, row=row, col=col, diag_value=1.0)
+        h_zero = insert_row_col(tr.linalg.inv(h), i=l, row=row, col=col, diag_value=0.0)
+        H_inv_i= H_inv[:,l].unsqueeze(1)
+        prod_H= H_inv_i.T @ h_zero @ H_inv_i
+        H_ii=H_inv[l,l]-prod_H.item()
+
+        k=remove_row_col(K_inv,l)
+        k_id = insert_row_col(k, i=0, row=row, col=col, diag_value=1.0)
+        k_zero = insert_row_col(tr.linalg.inv(k), i=l, row=row, col=col, diag_value=0.0)
+        K_inv_i= K_inv[:,l].unsqueeze(1)
+        prod_K= K_inv_i.T @ k_zero @ K_inv_i
+        K_ii=K_inv[l,l]-prod_K.item()
+
+
+        KL[l]=0.5*tr.sqrt(1.0/(tr.det(h_id@H)*H_ii))*(-tr.log(tr.det(h_id@H)/tr.det(k_id@K))-1+K_ii/H_ii +K_ii*(qbar[l]-g[l])**2)
+
+    return KL
 
 
 def plottrained(fit,iB,nn,zs):
@@ -152,7 +225,7 @@ def Modelaveraging_importantsampling_gauss(fits_comb,nn,Nsamp,iB,list):
     print(f'### INITIALIZE MODEL AVERAGING {fits_comb[0].modelname}_{fits_comb[0].kernelname}({fits_comb[0].ITD}_{fits_comb[0].mode}) ###')
     #remember that for Im(M) the range goes to 12 because there is no mock data set
     for i in range(len(fits_comb)):
-        if fits_comb[i].name in ['z=NNPDF(4)','z=NNPDF(10)','z=NNPDF(25)']:
+        if fits_comb[i].name in ['z=NNPDF(4)','z=NNPDF(10)','z=NNPDF(25)','z=3a','z=6a','z=9a']:
             #fits_comb[i].trace=filtered_traces[i][::filtered_traces[i].shape[0]//nnn]
             qofx,cov,pms,Qofv,covnu,Qvs=fits_comb[i].model_averaging_IS(Nsamp,nn,iB,prob=True,fullevi=True)
         else:
@@ -204,7 +277,7 @@ def save_data(fits_comb,data):
 def redefine_kernel(fit_test,iB,pval):
     numax=-1
     for i in range(len(fit_test)):
-        if fit_test[i].name in ['z=NNPDF(4)','z=NNPDF(10)','z=NNPDF(25)']:
+        if fit_test[i].name in ['z=NNPDF(4)','z=NNPDF(10)','z=NNPDF(25)','z=3a','z=6a','z=9a']:
             flag=False
             print("##### Name of the fit",fit_test[i].name,flush=True)
             #transform to tuple
@@ -1150,6 +1223,45 @@ def rbf_deb_no_s(x,w1,w2,s1=1.0,s2=1.0,scale=1.0,sp=0.1,eps=1e-12):
     sC = 1-s
     return  s*K1*s.T +sC*K2*sC.T
 
+def polylog1(x,s,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return s/(xx+yy-xx*yy)
+
+def polylog1full(x,s,w1,w2,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return s/(xx+yy/w1-xx*yy/w2)
+
+def polylog1_no_s(x,w1,w2,s=1.0,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return s/(xx+yy/w1-xx*yy/w2)
+
+def polylog2(x,s,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return -s*tr.log(xx+yy-xx*yy)
+
+def polylog2full(x,s,w1,w2,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return -s*tr.log(xx+yy/w1-xx*yy/w2)
+
+def polylog2_no_s(x,w1,w2,s=1.0,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return -s*tr.log(xx+yy/w1-xx*yy/w2)
+
+def Kinv(x,s,w1,w2,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return s/(1+((xx - yy)/w1)**2+((tr.log(xx+eps) - tr.log(yy+eps))/w2)**2)
+
+def Kinv_no_s(x,w1,w2,s=1.0,eps=1e-13):
+    xx=x.view(1,x.shape[0])
+    yy=x.view(x.shape[0],1)
+    return s/(1+((xx - yy)/w1)**2+((tr.log(xx+eps) - tr.log(yy+eps))/w2)**2)
 
 #DERIVATIVES
 def Krbf_ds(x,s,w):
@@ -1632,6 +1744,77 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx,ITD):
         labk=['σ1','l1','σ2','l2','s']
         kerfunc=rbf_logrbf
 
+    if kernelname==Kinv.__name__:
+        meank=tr.tensor([0.0,0.0,0.0])
+        sigmak=tr.tensor([5., 1., 1.]) #ModelC
+        #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
+        configk=tr.tensor([2,2,2])
+        #ker=(50.0,1.1,50.0,1.0,1.0)
+        ker=(1.0,np.log(2.0),np.log(2.0))
+        labk=['σ1','l1','l2']
+        kerfunc=Kinv
+    
+    if kernelname==polylog1.__name__:
+        meank=tr.tensor([0.0])
+        sigmak=tr.tensor([5.]) #ModelC
+        #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
+        configk=tr.tensor([2])
+        #ker=(50.0,1.1,50.0,1.0,1.0)
+        ker=(1.0,)
+        labk=['σ1',]
+        kerfunc=polylog1
+
+    if kernelname==polylog1full.__name__:
+        meank=tr.tensor([0.0,0.0,0.0])
+        sigmak=tr.tensor([5., 1., 1.]) #ModelC
+        #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
+        configk=tr.tensor([2,2,2])
+        #ker=(50.0,1.1,50.0,1.0,1.0)
+        ker=(1.0,np.log(2.0),np.log(2.0))
+        labk=['σ1','l1','l2']
+        kerfunc=polylog1full
+    
+
+    elif kernelname==polylog2.__name__:
+        meank=tr.tensor([0.0])
+        sigmak=tr.tensor([5.]) #ModelC
+        #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
+        configk=tr.tensor([2])
+        #ker=(50.0,1.1,50.0,1.0,1.0)
+        ker=(1.0,)
+        labk=['σ1',]
+        kerfunc=polylog2
+
+    elif kernelname==polylog2full.__name__:
+        meank=tr.tensor([0.0,0.0,0.0])
+        sigmak=tr.tensor([5., 1., 1.]) #ModelC
+        #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
+        configk=tr.tensor([2,2,2])
+        #ker=(50.0,1.1,50.0,1.0,1.0)
+        ker=(1.0,np.log(2.0),np.log(2.0))
+        labk=['σ1','l1','l2']
+        kerfunc=polylog2full
+
+    elif re.match( r'^polylog1_no_s=(-?\d+\.\d+)$',kernelname):
+        res=re.match( r'^polylog1_no_s=(-?\d+\.\d+)$',kernelname)
+        s1 = float(res.group(1))
+        meank=tr.tensor([0.0,0.0])
+        sigmak=tr.tensor([5.0,5.0])
+        configk=tr.tensor([2,2])
+        ker=(np.log(2),np.log(2))
+        labk=['l','l1']
+        kerfunc=lambda x, w1, w2: polylog1_no_s(x, w1, w2, s=s1, eps=1e-13)
+
+    elif re.match( r'^polylog2_no_s=(-?\d+\.\d+)$',kernelname):
+        res=re.match( r'^polylog2_no_s=(-?\d+\.\d+)$',kernelname)
+        s1 = float(res.group(1))
+        meank=tr.tensor([0.0,0.0])
+        sigmak=tr.tensor([5.0,5.0])
+        configk=tr.tensor([2,2])
+        ker=(np.log(2),np.log(2))
+        labk=['l','l1']
+        kerfunc=lambda x, w1, w2: polylog2_no_s(x, w1, w2, s=s1, eps=1e-13)
+
     elif re.match( r'^Krbflog_no_sn=(-?\d+\.\d+)$',kernelname):
         res=re.match( r'^Krbflog_no_sn=(-?\d+\.\d+)$',kernelname)
         s1 = float(res.group(1))
@@ -1642,21 +1825,21 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx,ITD):
         labk=['l']
         kerfunc=lambda x, w: Krbflog_no_s(x, w, s=s1, eps=1e-13)
 
-    if kernelname==rbf_logrbf_l.__name__:
+    elif re.match( r'^Kinv_no_s=(-?\d+\.\d+)$',kernelname):
+        res=re.match( r'^Kinv_no_s=(-?\d+\.\d+)$',kernelname)
+        s1 = float(res.group(1))
         meank=tr.tensor([0.0,0.0])
-        sigmak=tr.tensor([ 1.5, 1.0]) #ModelC
-        #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
+        sigmak=tr.tensor([2.0,2.0])
         configk=tr.tensor([2,2])
-        #ker=(50.0,1.1,50.0,1.0,1.0)
-        ker=(np.log(2.5),np.log(2.0))
-        labk=['l1','l2']#low x, high x
-        kerfunc=rbf_logrbf_l
+        ker=(1.0,1.0)
+        labk=['l','l1']
+        kerfunc=lambda x, w1, w2: Kinv_no_s(x, w1, w2, s=s1, eps=1e-13)
 
-    if re.match( r'^rbf_logrbf_ln=(-?\d+\.\d+)$',kernelname):
+    elif re.match( r'^rbf_logrbf_ln=(-?\d+\.\d+)$',kernelname):
         res=re.match( r'^rbf_logrbf_ln=(-?\d+\.\d+)$',kernelname)
         ss2 = float(res.group(1))
         meank=tr.tensor([0.0,0.0])
-        sigmak=tr.tensor([ 1.5, 1.0]) #ModelC
+        sigmak=tr.tensor([ 1.0, 1.0]) #ModelC
         #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
         configk=tr.tensor([2,2])
         #ker=(50.0,1.1,50.0,1.0,1.0)
@@ -1664,6 +1847,27 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx,ITD):
         labk=['l1','l2']#low x, high x
         kerfunc=lambda x, w1,w2: rbf_logrbf_l(x, w1,w2, s1=2.0,s2=ss2, eps=1e-13)
         #kerfunc=rbf_logrbf_l
+
+    elif re.match( r'^Kdebbioxa_no_sn=(-?\d+\.\d+)$',kernelname):
+        res=re.match( r'^Kdebbioxa_no_sn=(-?\d+\.\d+)$',kernelname)
+        s1 = float(res.group(1))
+        meank=tr.tensor([0.0,-0.8])
+        sigmak=tr.tensor([1.0,0.8])
+        configk=tr.tensor([2,2])
+        ker=(np.log(2.0),-0.1)
+        labk=['l','α']
+        kerfunc=lambda x, w,a: Kdebbioxa_no_s(x, w, a,sig=s1, eps=1e-13)
+
+
+    if kernelname==rbf_logrbf_l.__name__:
+        meank=tr.tensor([0.0,0.0])
+        sigmak=tr.tensor([ 1.0, 1.0]) #ModelC
+        #sigmak=tr.tensor([11.0,6.0,11.0,6.0,2.0])
+        configk=tr.tensor([2,2])
+        #ker=(50.0,1.1,50.0,1.0,1.0)
+        ker=(np.log(2.5),np.log(2.0))
+        labk=['l1','l2']#low x, high x
+        kerfunc=rbf_logrbf_l
 
     elif kernelname==rbf_deb.__name__: 
         meank=tr.tensor([0.0,0.0,0.0,0.0,0.0])
@@ -1826,16 +2030,6 @@ def arguments(modelname,kernelname,nugget,device,mode,ID,grid,Nx,ITD):
         labk=['σ','l']
         kerfunc=Kdebbio
 
-    elif re.match( r'^Kdebbioxa_no_sn=(-?\d+\.\d+)$',kernelname):
-        res=re.match( r'^Kdebbioxa_no_sn=(-?\d+\.\d+)$',kernelname)
-        s1 = float(res.group(1))
-        meank=tr.tensor([0.0,-1.0])
-        sigmak=tr.tensor([1.0,1.0])
-        configk=tr.tensor([2,2])
-        ker=(np.log(2.0),-0.25)
-        labk=['l','α']
-        kerfunc=lambda x, w,a: Kdebbioxa_no_s(x, w, a,sig=s1, eps=1e-13)
-
     elif kernelname==Kdebbioxa.__name__:
         meank=tr.tensor([0.0,0.0,-1.0])
         sigmak=tr.tensor([5.0,1.0,1.0])
@@ -1958,6 +2152,8 @@ def generategrid(Nx,grid):
         x_grid = np.linspace(0.0+1e-6,1-1e-6,np.int32(Nx+1))
     elif grid=="log_lin":
         x_grid=np.concatenate((np.linspace(5e-9,1,1) ,np.logspace(-8,-1,np.int32(Nx/2)), np.linspace( 0.1+1e-4 ,1-1e-8,np.int32(Nx/2))))
+    elif grid=="linh":
+        x_grid = np.linspace(0.0+1e-3,1-1e-8,np.int32(Nx+1))
     return x_grid
 
 
@@ -1972,13 +2168,13 @@ def Modeldef(ITD,modelname,kernelname,nugget,device,mode,ID,test,grid,Nx,lambdas
     print("GP specifications \n Sampling or training: "+mode+"\n model: "+modelname+"\n kernel: "+kernelname+" nugget: "+ nugget+"\n Ioffe time Distribution: "+ITD+"(M)",
           "\n mean =",mean,"\n sigma =",sigma,"\n prior dist =",config,"\n model init =",mod,"\n kernel init =",ker,"\n device =",device,"\n mode =",mode,"\n ID =",ID)
     #print("0=gaussian, 1=lognormal, 2=expbeta")
-    if not (test in ["mock","NNPDF"]):
-        for i in range(0,12):
+    if test=="Colins":
+        for i in [2,5,8]:
             x_gri0,V0,Y0,Gamma0 = preparedata(i,nu,rMj,rMe,rM,x_grid,ITD=ITD)
             myGP0= GaussianProcess(x_gri0,V0,Y0,Gamma0,f"z={i+1}a",device=device,ITD=ITD,kernelname=kernelname,modelname=modelname,labels=lab,gridname=grid,nugget=nugget,Pd=modfunc, Ker=kerfunc,Pd_args=mod,Ker_args=ker)
             myGP0.prior2ndlevel(mode,0.99,mean=mean,sigma=sigma,prior_mode=config)
             fits_comb.append(myGP0)
-            #print(fits_comb[i].name, "done")
+            print(myGP0.name, "done")
     if ITD=="Re" and test=="mock":
         numax=[4,10,25]
         for j in range(0,3):

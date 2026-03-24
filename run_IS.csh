@@ -4,17 +4,17 @@
 #SBATCH --time=72:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --output=/sciclone/scr-lst/yacahuanamedra/GP/ToDo/run1.log
-#SBATCH --error=/sciclone/scr-lst/yacahuanamedra/GP/ToDo/run1.log
+#SBATCH --output=/sciclone/pscr/yacahuanamedra/GP/ToDo/run1.log
+#SBATCH --error=/sciclone/pscr/yacahuanamedra/GP/ToDo/run1.log
 
 
-if [ "$#" -ne 4 ]; then
+if [ "$#" -ne 5 ]; then
     echo "Usage: $0 <KERNEL_NAME>"
     exit 1
 fi
 
 if [[ $(hostname) == fm* ]]; then
-    EXCLUDE="fm01,fm04,fm08,fm24"
+    EXCLUDE="fm01,fm04,fm08,fm24,fm30"
 else
     EXCLUDE=""
 fi
@@ -23,6 +23,7 @@ models=($1)
 modes=($2)
 grids=($3)
 kernels=($4)
+data=($5)
 
 for kernel in ${kernels[@]}; do
   for model in ${models[@]}; do
@@ -36,16 +37,16 @@ for kernel in ${kernels[@]}; do
 cat << EOF > $SLURM_SCRIPT
 #!/bin/bash
 
-#SBATCH --job-name=${model}_${kernel}(${mode}+${grid})
-#SBATCH --output=/sciclone/scr-lst/yacahuanamedra/GP/${model}_${kernel}(${mode}+${grid})/specs_data.log
-#SBATCH --error=/sciclone/scr-lst/yacahuanamedra/GP/${model}_${kernel}(${mode}+${grid})/specs_data.log
+#SBATCH --job-name=${model}_${kernel}(${mode}+${grid})_${data}
+#SBATCH --output=/sciclone/pscr/yacahuanamedra/GP/${model}_${kernel}(${mode}+${grid})/specs_data_${data}.log
+#SBATCH --error=/sciclone/pscr/yacahuanamedra/GP/${model}_${kernel}(${mode}+${grid})/specs_data_${data}.log
 #SBATCH --time=72:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
 #SBATCH --mem=2000M
 #SBATCH --exclude=${EXCLUDE}
 
-cd /sciclone/scr-lst/yacahuanamedra/GP/
+cd /sciclone/pscr/yacahuanamedra/GP/
 
 source ~/.bashrc
 module load miniforge3/24.9.2-0
@@ -64,7 +65,7 @@ echo "In directory: $(pwd)"
 
 
 echo "Starting Python at $(date)"
-python3 run_IS.py --mean "$model" --ker "$kernel" --mode "$mode" --grid "$grid" 
+python3 run_IS.py --mean "$model" --ker "$kernel" --mode "$mode" --grid "$grid" --data "$data"
 echo "Finished Python at $(date)"
 EOF
         JOB_ID=$(sbatch "$SLURM_SCRIPT" | awk '{print $4}')

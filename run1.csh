@@ -4,8 +4,8 @@
 #SBATCH --time=72:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --output=/sciclone/scr-lst/yacahuanamedra/GP/ToDo/run1.log
-#SBATCH --error=/sciclone/scr-lst/yacahuanamedra/GP/ToDo/run1.log
+#SBATCH --output=/sciclone/pscr/yacahuanamedra/GP/ToDo/run1.log
+#SBATCH --error=/sciclone/pscr/yacahuanamedra/GP/ToDo/run1.log
 
 
 if [ "$#" -ne 8 ]; then
@@ -51,8 +51,8 @@ cat << EOF > $SLURM_SCRIPT
 #!/bin/bash
 
 #SBATCH --job-name=${MODEL}_${KERNEL_NAME}(${mode}+${grid})${ITD}(z=${AA}a)
-#SBATCH --output=/sciclone/scr-lst/yacahuanamedra/GP/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs1/GP${ITD}(z=${AA}a)_%a.log
-#SBATCH --error=/sciclone/scr-lst/yacahuanamedra/GP/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs1/GP${ITD}(z=${AA}a)_%a.log
+#SBATCH --output=/sciclone/pscr/yacahuanamedra/GP/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs1/GP${ITD}(z=${AA}a)_%a.log
+#SBATCH --error=/sciclone/pscr/yacahuanamedra/GP/${MODEL}_${KERNEL_NAME}(${mode}+${grid})/specs1/GP${ITD}(z=${AA}a)_%a.log
 #SBATCH --time=72:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1

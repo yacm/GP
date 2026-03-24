@@ -4,8 +4,8 @@
 #SBATCH --time=72:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1 
-#SBATCH --output=/sciclone/scr-lst/yacahuanamedra/GP/ToDo/nnpdf.log
-#SBATCH --error=/sciclone/scr-lst/yacahuanamedra/GP/ToDo/nnpdf.log
+#SBATCH --output=/sciclone/pscr/yacahuanamedra/GP/ToDo/nnpdf.log
+#SBATCH --error=/sciclone/pscr/yacahuanamedra/GP/ToDo/nnpdf.log
 
 # Ensure the script is executed with exactly 3 arguments
 if [ "$#" -ne 5 ]; then
