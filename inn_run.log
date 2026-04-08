@@ -1,0 +1,213 @@
+tensor([1.], device='cuda:0')
+Building PDF prior and drawing 1000000 samples...
+torch.Size([129])
+Built real/imag ITD integrators.
+Building parametric PDF_N dataset and its ITD projection...
+Projecting PDF samples to ITD real/imag parts...
+Saved parametric dataset plot: plots_inn/imag/parametric_dataset_initial.png
+Adding correlated padding noise to ITD samples...
+kernoise not found; using diagonal Gaussian padding noise.
+torch.Size([1000000, 22])
+Reshaping samples into batches of size 500...
+torch.Size([2000, 500, 129]) torch.Size([2000, 500, 22])
+Starting training: cycles=3, epochs_per_cycle=2000, batches=2000, pdf_dim=129, itd_dim=12, z_dim=12
+Cycle 1/3
+Epoch     0 | Loss 1568.505738 | Ly(ITD) 11.226906 | Lz(Z) 2.195738 | Lx(PDF) 2.746870 | Lpad 1384.483287  | Ls 78.461835 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_00000.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_00000.png
+Epoch   100 | Loss 73.175798 | Ly(ITD) 0.095966 | Lz(Z) 0.042162 | Lx(PDF) 2.739302 | Lpad 0.537505  | Ls 44.343820 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_00100.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_00100.png
+Epoch   200 | Loss 55.592341 | Ly(ITD) 0.107503 | Lz(Z) 0.041653 | Lx(PDF) 1.175569 | Lpad 0.403526  | Ls 42.479078 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_00200.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_00200.png
+Epoch   300 | Loss 51.394147 | Ly(ITD) 0.099463 | Lz(Z) 0.041748 | Lx(PDF) 0.909649 | Lpad 0.391178  | Ls 40.991685 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_00300.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_00300.png
+Epoch   400 | Loss 49.692085 | Ly(ITD) 0.083500 | Lz(Z) 0.034001 | Lx(PDF) 0.754917 | Lpad 0.335687  | Ls 41.049714 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_00400.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_00400.png
+Epoch   500 | Loss 46.253638 | Ly(ITD) 0.072803 | Lz(Z) 0.030600 | Lx(PDF) 0.644869 | Lpad 0.294956  | Ls 38.839976 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_00500.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_00500.png
+Epoch   600 | Loss 45.092569 | Ly(ITD) 0.068373 | Lz(Z) 0.025237 | Lx(PDF) 0.598193 | Lpad 0.282178  | Ls 38.234218 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_00600.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_00600.png
+Epoch   700 | Loss 44.711360 | Ly(ITD) 0.063513 | Lz(Z) 0.027135 | Lx(PDF) 0.565251 | Lpad 0.255430  | Ls 38.214504 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_00700.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_00700.png
+Epoch   800 | Loss 42.417437 | Ly(ITD) 0.057776 | Lz(Z) 0.027524 | Lx(PDF) 0.486752 | Lpad 0.232108  | Ls 36.753687 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_00800.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_00800.png
+Epoch   900 | Loss 41.107709 | Ly(ITD) 0.058436 | Lz(Z) 0.026059 | Lx(PDF) 0.421670 | Lpad 0.207552  | Ls 36.130683 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_00900.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_00900.png
+Epoch  1000 | Loss 39.430628 | Ly(ITD) 0.059243 | Lz(Z) 0.024442 | Lx(PDF) 0.350121 | Lpad 0.198335  | Ls 35.190452 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_01000.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_01000.png
+Epoch  1100 | Loss 36.926985 | Ly(ITD) 0.058423 | Lz(Z) 0.029074 | Lx(PDF) 0.292297 | Lpad 0.196361  | Ls 33.224805 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_01100.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_01100.png
+Epoch  1200 | Loss 38.263479 | Ly(ITD) 0.058795 | Lz(Z) 0.025617 | Lx(PDF) 0.275424 | Lpad 0.186332  | Ls 34.772762 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_01200.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_01200.png
+Epoch  1300 | Loss 37.546043 | Ly(ITD) 0.059196 | Lz(Z) 0.028596 | Lx(PDF) 0.254999 | Lpad 0.175194  | Ls 34.238920 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_01300.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_01300.png
+Epoch  1400 | Loss 36.388968 | Ly(ITD) 0.053545 | Lz(Z) 0.024994 | Lx(PDF) 0.259591 | Lpad 0.158492  | Ls 33.116902 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_01400.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_01400.png
+Epoch  1500 | Loss 35.690704 | Ly(ITD) 0.052813 | Lz(Z) 0.027120 | Lx(PDF) 0.225465 | Lpad 0.151843  | Ls 32.748950 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_01500.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_01500.png
+Epoch  1600 | Loss 35.046027 | Ly(ITD) 0.051494 | Lz(Z) 0.025216 | Lx(PDF) 0.201779 | Lpad 0.138615  | Ls 32.379988 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_01600.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_01600.png
+Epoch  1700 | Loss 34.922437 | Ly(ITD) 0.050211 | Lz(Z) 0.023763 | Lx(PDF) 0.196180 | Lpad 0.128196  | Ls 32.343755 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_01700.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_01700.png
+Epoch  1800 | Loss 33.814990 | Ly(ITD) 0.047498 | Lz(Z) 0.022714 | Lx(PDF) 0.181336 | Lpad 0.121534  | Ls 31.415465 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_01800.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_01800.png
+Epoch  1900 | Loss 34.348303 | Ly(ITD) 0.046294 | Lz(Z) 0.024113 | Lx(PDF) 0.166823 | Lpad 0.115674  | Ls 32.091793 
+Saved snapshot: plots_inn/imag/snapshot_cycle_01_epoch_01900.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_01_epoch_01900.png
+Saved loss plot: plots_inn/imag/loss_history__cycle_1.png
+Saved combined loss plot: plots_inn/imag/loss_history__cycle_1_combined.png
+Created GIF: plots_inn/imag/snapshot_cycle_01.gif
+Created GIF: plots_inn/imag/itd_to_pdf_cycle_01.gif
+Cycle 2/3
+Epoch     0 | Loss 34.242694 | Ly(ITD) 0.046845 | Lz(Z) 0.021019 | Lx(PDF) 0.166693 | Lpad 0.111506  | Ls 32.019851 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_00000.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_00000.png
+Epoch   100 | Loss 32.852614 | Ly(ITD) 0.048364 | Lz(Z) 0.022926 | Lx(PDF) 0.146234 | Lpad 0.109126  | Ls 30.810072 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_00100.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_00100.png
+Epoch   200 | Loss 32.822007 | Ly(ITD) 0.046250 | Lz(Z) 0.024269 | Lx(PDF) 0.147486 | Lpad 0.100186  | Ls 30.773026 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_00200.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_00200.png
+Epoch   300 | Loss 32.629326 | Ly(ITD) 0.044742 | Lz(Z) 0.024325 | Lx(PDF) 0.145594 | Lpad 0.096135  | Ls 30.610296 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_00300.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_00300.png
+Epoch   400 | Loss 33.241106 | Ly(ITD) 0.048257 | Lz(Z) 0.022829 | Lx(PDF) 0.142860 | Lpad 0.111715  | Ls 31.231213 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_00400.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_00400.png
+Epoch   500 | Loss 33.322785 | Ly(ITD) 0.045665 | Lz(Z) 0.021601 | Lx(PDF) 0.146542 | Lpad 0.096475  | Ls 31.316557 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_00500.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_00500.png
+Epoch   600 | Loss 33.440576 | Ly(ITD) 0.046600 | Lz(Z) 0.023928 | Lx(PDF) 0.139437 | Lpad 0.093756  | Ls 31.480164 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_00600.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_00600.png
+Epoch   700 | Loss 34.132322 | Ly(ITD) 0.045251 | Lz(Z) 0.021789 | Lx(PDF) 0.139916 | Lpad 0.086516  | Ls 32.202506 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_00700.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_00700.png
+Epoch   800 | Loss 32.646297 | Ly(ITD) 0.044129 | Lz(Z) 0.020043 | Lx(PDF) 0.126463 | Lpad 0.091879  | Ls 30.868707 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_00800.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_00800.png
+Epoch   900 | Loss 33.196967 | Ly(ITD) 0.042847 | Lz(Z) 0.020206 | Lx(PDF) 0.128542 | Lpad 0.081817  | Ls 31.413430 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_00900.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_00900.png
+Epoch  1000 | Loss 32.994142 | Ly(ITD) 0.043472 | Lz(Z) 0.020024 | Lx(PDF) 0.118785 | Lpad 0.076780  | Ls 31.311904 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_01000.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_01000.png
+Epoch  1100 | Loss 31.494382 | Ly(ITD) 0.040392 | Lz(Z) 0.023679 | Lx(PDF) 0.107813 | Lpad 0.068975  | Ls 29.908531 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_01100.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_01100.png
+Epoch  1200 | Loss 32.524476 | Ly(ITD) 0.042276 | Lz(Z) 0.020991 | Lx(PDF) 0.106595 | Lpad 0.073201  | Ls 30.964030 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_01200.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_01200.png
+Epoch  1300 | Loss 32.076837 | Ly(ITD) 0.040761 | Lz(Z) 0.019857 | Lx(PDF) 0.100141 | Lpad 0.067672  | Ls 30.605381 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_01300.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_01300.png
+Epoch  1400 | Loss 31.545453 | Ly(ITD) 0.041340 | Lz(Z) 0.020959 | Lx(PDF) 0.100496 | Lpad 0.066635  | Ls 30.057563 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_01400.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_01400.png
+Epoch  1500 | Loss 31.221852 | Ly(ITD) 0.039986 | Lz(Z) 0.020220 | Lx(PDF) 0.095231 | Lpad 0.062114  | Ls 29.805294 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_01500.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_01500.png
+Epoch  1600 | Loss 31.041972 | Ly(ITD) 0.038283 | Lz(Z) 0.020510 | Lx(PDF) 0.086431 | Lpad 0.059906  | Ls 29.721242 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_01600.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_01600.png
+Epoch  1700 | Loss 31.230991 | Ly(ITD) 0.040173 | Lz(Z) 0.019626 | Lx(PDF) 0.093244 | Lpad 0.058451  | Ls 29.842980 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_01700.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_01700.png
+Epoch  1800 | Loss 30.108361 | Ly(ITD) 0.038834 | Lz(Z) 0.018547 | Lx(PDF) 0.077846 | Lpad 0.060094  | Ls 28.890170 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_01800.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_01800.png
+Epoch  1900 | Loss 30.959342 | Ly(ITD) 0.036835 | Lz(Z) 0.020276 | Lx(PDF) 0.084973 | Lpad 0.054429  | Ls 29.668244 
+Saved snapshot: plots_inn/imag/snapshot_cycle_02_epoch_01900.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_02_epoch_01900.png
+Saved loss plot: plots_inn/imag/loss_history__cycle_2.png
+Saved combined loss plot: plots_inn/imag/loss_history__cycle_2_combined.png
+Created GIF: plots_inn/imag/snapshot_cycle_02.gif
+Created GIF: plots_inn/imag/itd_to_pdf_cycle_02.gif
+Cycle 3/3
+Epoch     0 | Loss 30.805673 | Ly(ITD) 0.036985 | Lz(Z) 0.018478 | Lx(PDF) 0.077066 | Lpad 0.053524  | Ls 29.611785 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_00000.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_00000.png
+Epoch   100 | Loss 29.741301 | Ly(ITD) 0.039922 | Lz(Z) 0.016932 | Lx(PDF) 0.073706 | Lpad 0.056236  | Ls 28.579075 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_00100.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_00100.png
+Epoch   200 | Loss 29.848552 | Ly(ITD) 0.037589 | Lz(Z) 0.019056 | Lx(PDF) 0.080191 | Lpad 0.053895  | Ls 28.614250 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_00200.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_00200.png
+Epoch   300 | Loss 29.626741 | Ly(ITD) 0.037882 | Lz(Z) 0.018041 | Lx(PDF) 0.074382 | Lpad 0.054093  | Ls 28.459012 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_00300.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_00300.png
+Epoch   400 | Loss 30.346301 | Ly(ITD) 0.039652 | Lz(Z) 0.018683 | Lx(PDF) 0.072348 | Lpad 0.059030  | Ls 29.178696 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_00400.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_00400.png
+Epoch   500 | Loss 30.081334 | Ly(ITD) 0.036039 | Lz(Z) 0.016907 | Lx(PDF) 0.074937 | Lpad 0.048336  | Ls 28.934367 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_00500.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_00500.png
+Epoch   600 | Loss 30.135113 | Ly(ITD) 0.037032 | Lz(Z) 0.019411 | Lx(PDF) 0.069472 | Lpad 0.051267  | Ls 29.009860 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_00600.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_00600.png
+Epoch   700 | Loss 30.822189 | Ly(ITD) 0.039121 | Lz(Z) 0.016318 | Lx(PDF) 0.069596 | Lpad 0.052464  | Ls 29.714980 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_00700.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_00700.png
+Epoch   800 | Loss 29.857311 | Ly(ITD) 0.037432 | Lz(Z) 0.016414 | Lx(PDF) 0.068226 | Lpad 0.053117  | Ls 28.770636 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_00800.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_00800.png
+Epoch   900 | Loss 30.267356 | Ly(ITD) 0.037664 | Lz(Z) 0.018744 | Lx(PDF) 0.069510 | Lpad 0.053010  | Ls 29.143481 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_00900.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_00900.png
+Epoch  1000 | Loss 30.508430 | Ly(ITD) 0.038877 | Lz(Z) 0.016464 | Lx(PDF) 0.067640 | Lpad 0.050803  | Ls 29.422199 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_01000.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_01000.png
+Epoch  1100 | Loss 29.229280 | Ly(ITD) 0.035537 | Lz(Z) 0.018606 | Lx(PDF) 0.066174 | Lpad 0.047358  | Ls 28.156440 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_01100.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_01100.png
+Epoch  1200 | Loss 30.715967 | Ly(ITD) 0.038740 | Lz(Z) 0.020746 | Lx(PDF) 0.068642 | Lpad 0.050684  | Ls 29.577703 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_01200.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_01200.png
+Epoch  1300 | Loss 30.542838 | Ly(ITD) 0.035242 | Lz(Z) 0.016809 | Lx(PDF) 0.066408 | Lpad 0.046090  | Ls 29.488359 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_01300.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_01300.png
+Epoch  1400 | Loss 30.028382 | Ly(ITD) 0.035166 | Lz(Z) 0.019315 | Lx(PDF) 0.067107 | Lpad 0.046447  | Ls 28.941884 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_01400.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_01400.png
+Epoch  1500 | Loss 29.785487 | Ly(ITD) 0.034754 | Lz(Z) 0.018304 | Lx(PDF) 0.064066 | Lpad 0.043692  | Ls 28.744332 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_01500.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_01500.png
+Epoch  1600 | Loss 29.842676 | Ly(ITD) 0.033254 | Lz(Z) 0.016508 | Lx(PDF) 0.060292 | Lpad 0.041581  | Ls 28.866829 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_01600.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_01600.png
+Epoch  1700 | Loss 29.807462 | Ly(ITD) 0.035267 | Lz(Z) 0.019715 | Lx(PDF) 0.061985 | Lpad 0.041718  | Ls 28.772410 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_01700.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_01700.png
+Epoch  1800 | Loss 28.872675 | Ly(ITD) 0.032387 | Lz(Z) 0.016209 | Lx(PDF) 0.052213 | Lpad 0.040565  | Ls 27.985959 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_01800.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_01800.png
+Epoch  1900 | Loss 29.773826 | Ly(ITD) 0.032207 | Lz(Z) 0.019137 | Lx(PDF) 0.058100 | Lpad 0.037716  | Ls 28.802709 
+Saved snapshot: plots_inn/imag/snapshot_cycle_03_epoch_01900.png
+Saved ITD->PDF uncertainty snapshot: plots_inn/imag/itd_to_pdf_cycle_03_epoch_01900.png
+Saved loss plot: plots_inn/imag/loss_history__cycle_3.png
+Saved combined loss plot: plots_inn/imag/loss_history__cycle_3_combined.png
+Created GIF: plots_inn/imag/snapshot_cycle_03.gif
+Created GIF: plots_inn/imag/itd_to_pdf_cycle_03.gif
+Saved loss plot: plots_inn/imag/loss_history__all_cycles.png
+Saved combined loss plot: plots_inn/imag/loss_history__all_cycles_combined.png
+Building parametric evaluation dataset with 1000 samples...
+Parametric evaluation | ITD L1 0.056338 | PDF L1 0.589049 | ITD MMD 1.006013 | PDF MMD 2.352249
+Saved evaluation snapshot: plots_inn/imag/evaluation_parametric_dataset.png

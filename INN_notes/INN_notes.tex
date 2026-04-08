@@ -1,0 +1,135 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fancyvrb}
+
+\title{Minimal Notes for \texttt{INN.py}}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\section*{Purpose}
+\texttt{INN.py} trains an invertible neural network (INN) to map between a PDF-like object in $x$ space and an ITD-like object in $\nu$ space. The code is designed so that:
+\begin{itemize}[leftmargin=1.5em]
+    \item the \emph{forward} map sends a PDF to an observed ITD, a latent variable $z$, and padding variables,
+    \item the \emph{inverse} map reconstructs a PDF from an ITD, a sampled latent variable, and padding noise,
+    \item training uses synthetic datasets generated from a Gaussian-process prior or from a parametric family.
+\end{itemize}
+
+In practice, the code is useful for learning an approximate inverse map
+\[
+\text{ITD} \longrightarrow \text{PDF},
+\]
+while still enforcing consistency with the forward direction through the invertible architecture.
+
+\section*{Main Ingredients}
+\subsection*{1. PDF prior}
+The training PDFs are generated from a Gaussian-process prior on the $x$ grid. The code supports:
+\begin{itemize}[leftmargin=1.5em]
+    \item a single kernel, or
+    \item a mixture of kernels, such as \texttt{Krbflog} and \texttt{rbf\_logrbf}.
+\end{itemize}
+An optional constraint at $x=1$ can also be imposed through a precision-term modification.
+
+\subsection*{2. ITD construction}
+For each PDF sample, the code builds the ITD by applying a precomputed integration matrix. The user can choose:
+\begin{itemize}[leftmargin=1.5em]
+    \item the real part, using cosine kernels,
+    \item the imaginary part, using sine kernels.
+\end{itemize}
+The observed ITD points live on a user-defined $\nu$ grid.
+
+\subsection*{3. Extra dimensions}
+The inverse problem is underdetermined, so the INN uses:
+\begin{itemize}[leftmargin=1.5em]
+    \item a latent vector $z$,
+    \item padding/noise variables.
+\end{itemize}
+These extra variables allow the inverse map to represent uncertainty and non-uniqueness.
+
+\subsection*{4. Training objective}
+The active training objective is a weighted combination of:
+\begin{itemize}[leftmargin=1.5em]
+    \item $L_y$: supervised loss on the observed ITD,
+    \item $L_z$: MMD loss in latent space,
+    \item $L_x$: MMD loss in reconstructed PDF space,
+    \item $L_{\mathrm{pad}}$: padding regularization.
+\end{itemize}
+In the current setup, the code uses the \emph{biased} multiscale multiquadratic MMD. Smoothness is computed and logged, but it is not part of the active loss unless reintroduced manually.
+
+\section*{What the Script Produces}
+When training runs, the script:
+\begin{itemize}[leftmargin=1.5em]
+    \item generates or refreshes training samples,
+    \item trains cycle by cycle,
+    \item saves PNG snapshots during training,
+    \item converts the PNGs into GIFs,
+    \item saves loss plots,
+    \item evaluates the trained model on a parametric dataset,
+    \item saves a final summary tensor with reconstructed PDF mean, standard deviation, and covariance.
+\end{itemize}
+
+All outputs are written under a subdirectory of \texttt{plots\_inn/}, with a name determined by the flags (real/imag, kernel mode, number of data points, noise dimension, normalization, and optional $x=1$ constraint).
+
+\section*{How to Run}
+From the project root, a representative command is:
+
+\begin{Verbatim}[fontsize=\small]
+python -u INN.py --cycles 3 --gp-kernel-mode mixture \
+--gp-kernel-list Krbflog,rbf_logrbf \
+--itd-points 20 --noise-dim 80 \
+--itd-min 0.0 --itd-max 24.0 \
+--itd-part imag --normalize-data --x1-constraint
+\end{Verbatim}
+
+\noindent This configuration means:
+\begin{itemize}[leftmargin=1.5em]
+    \item \texttt{--cycles 3}: train for three outer cycles,
+    \item \texttt{--gp-kernel-mode mixture}: use more than one GP prior kernel,
+    \item \texttt{--gp-kernel-list Krbflog,rbf\_logrbf}: alternate between these two kernels,
+    \item \texttt{--itd-points 20}: use 20 observed ITD points,
+    \item \texttt{--noise-dim 80}: append 80 padding/noise dimensions,
+    \item \texttt{--itd-min 0.0 --itd-max 24.0}: use observed $\nu \in [0,24]$,
+    \item \texttt{--itd-part imag}: train on the imaginary ITD,
+    \item \texttt{--normalize-data}: whiten PDF and ITD data using dataset statistics,
+    \item \texttt{--x1-constraint}: activate the optional $x=1$ prior constraint.
+\end{itemize}
+
+\section*{Training Logic}
+The code currently refreshes the training samples at the beginning of each cycle. If several kernels are used, the batches are alternated across epochs so that the model is exposed to distinct prior families during the same training run. When normalization is enabled, the normalization statistics are computed in the first cycle and then reused in later cycles to reduce instability.
+
+\section*{Files and Outputs}
+The most useful outputs are:
+\begin{itemize}[leftmargin=1.5em]
+    \item cycle GIFs showing training evolution,
+    \item all-cycle GIFs,
+    \item loss plots,
+    \item a final evaluation plot on parametric samples,
+    \item a tensor named like \texttt{INN\_PDF\_dat\_20.pt} containing:
+    \[
+    \{\texttt{mean},\ \texttt{std},\ \texttt{cov},\ \texttt{n\_samples}\}.
+    \]
+\end{itemize}
+
+\section*{Practical Notes}
+\begin{itemize}[leftmargin=1.5em]
+    \item If you run on a remote node without a display, the script saves figures instead of showing them interactively.
+    \item If the training becomes unstable, the first things to inspect are:
+    \begin{itemize}[leftmargin=1.5em]
+        \item normalization,
+        \item the MMD weights,
+        \item the amount of padding noise,
+        \item the kernel mixture strategy.
+    \end{itemize}
+    \item For the inverse problem, uncertainty is controlled both by the latent variable $z$ and by the padding/noise variables.
+\end{itemize}
+
+\end{document}

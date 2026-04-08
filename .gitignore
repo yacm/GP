@@ -15,3 +15,5 @@ __pycache__/
 .vscode/
 NNPDF/
 INNpaper.pdf
+plots_inn/
+plots_inn.tar.gz
